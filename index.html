@@ -400,7 +400,12 @@
             </div>
 
             <div class="seccion-form">
-                <h5>💰 Historial de Cobros por Servicios (Pedidos)</h5>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h5 style="margin: 0;">💰 Historial de Cobros por Servicios (Pedidos)</h5>
+                    <span style="font-size: 0.9em; background: #e8eaf6; color: var(--primary); padding: 4px 10px; border-radius: 6px; font-weight: bold;">
+                        Total de Servicios: <span id="contador-servicios-op">0</span>
+                    </span>
+                </div>
                 <div id="lista-operaciones-pedidos" class="admin-list" style="max-height: 350px;">
                     <p style="color: #777; font-size: 0.9em;">Cargando operaciones de cobro...</p>
                 </div>
@@ -1081,8 +1086,20 @@
 
     function actualizarRegistroOperacionesUI() {
         const listaOpPedidos = document.getElementById('lista-operaciones-pedidos');
+        const contadorServiciosOp = document.getElementById('contador-servicios-op');
         const rango = document.getElementById('op-rango') ? document.getElementById('op-rango').value : 'mes';
         let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
+
+        // Ordenar cronológicamente por fecha de entrega (ascendente: más antiguo a más reciente, o descendiente si se prefiere. Aquí cronológico estándar: de menor a mayor fecha)
+        pedidosFiltrados.sort((a, b) => {
+            let fechaA = new Date(a.fechaEntrega || 0);
+            let fechaB = new Date(b.fechaEntrega || 0);
+            return fechaA - fechaB;
+        });
+
+        if(contadorServiciosOp) {
+            contadorServiciosOp.textContent = pedidosFiltrados.length;
+        }
 
         if(listaOpPedidos) {
             listaOpPedidos.innerHTML = '';
@@ -1093,7 +1110,7 @@
                     let div = document.createElement('div');
                     div.className = 'admin-item';
                     div.innerHTML = `
-                        <span><b>${p.clienteNombre || 'Cliente'}</b> (Lav: N° ${p.lavadoraAsignada || 'N/A'}) - Monto: <b style="color:var(--accent);">$${p.montoPagado ? parseFloat(p.montoPagado).toFixed(2) : '0.00'}</b> [${p.estatus.toUpperCase()}]</span>
+                        <span><b>📅 ${formatearFechaDMY(p.fechaEntrega)}</b> | <b>${p.clienteNombre || 'Cliente'}</b> (Lav: N° ${p.lavadoraAsignada || 'N/A'}) - Monto: <b style="color:var(--accent);">$${p.montoPagado ? parseFloat(p.montoPagado).toFixed(2) : '0.00'}</b> [${p.estatus.toUpperCase()}]</span>
                         <div>
                             <button class="btn-accion" style="padding:4px 8px; font-size:0.75em;" onclick="abrirModalEditarPedidoOp('${p.id}')">✏️ Editar</button>
                             <button class="btn-peligro" style="padding:4px 8px; font-size:0.75em;" onclick="eliminarPedidoOp('${p.id}')">🗑️</button>
