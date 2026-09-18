@@ -83,6 +83,7 @@
             <button class="tab-btn" onclick="cambiarPestaña(event, 'tab-finanzas')">💰 4. Finanzas</button>
             <button class="tab-btn" onclick="cambiarPestaña(event, 'tab-estadisticas')">📊 5. Estadísticas</button>
             <button class="tab-btn" onclick="cambiarPestaña(event, 'tab-admin')">🛠️ 6. Administración</button>
+            <button class="tab-btn" onclick="cambiarPestaña(event, 'tab-operaciones')">📋 7. Registro de Operaciones</button>
         </div>
 
         <!-- PESTAÑA 1: AGREGAR PEDIDO -->
@@ -190,7 +191,6 @@
             <div class="seccion-form">
                 <h5>2) Mantenimiento de vehículo</h5>
                 <label style="font-size: 0.85em; font-weight: bold;">Monto base de mantenimiento (pesos):</label>
-                <!-- CORREGIDO: Se establece el valor por defecto en 210000 -->
                 <input type="number" id="fin-mantenimiento-base" class="input-field" value="210000" oninput="actualizarFinanzas()">
                 <p style="font-size: 0.9em; color: #555; margin-top: 5px;">Monto ajustado al lapso seleccionado: <b id="fin-mantenimiento-calculado">0</b> pesos</p>
             </div>
@@ -381,6 +381,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- PESTAÑA 7: REGISTRO DE OPERACIONES -->
+        <div id="tab-operaciones" class="tab-content">
+            <h4 style="color: var(--primary); margin-top: 0;">📋 Registro General de Operaciones y Pagos</h4>
+            <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">Aquí puedes visualizar, editar el monto pagado, modificar o eliminar cualquier operación de cobro registrada en el sistema.</p>
+            
+            <div class="seccion-form">
+                <h5>📅 Lapso de Tiempo</h5>
+                <select id="op-rango" class="input-field" onchange="actualizarRegistroOperacionesUI()">
+                    <option value="hoy">Hoy</option>
+                    <option value="ayer">Ayer</option>
+                    <option value="esta semana">Esta semana</option>
+                    <option value="mes" selected>Este mes</option>
+                    <option value="ultimos tres meses">Últimos tres meses</option>
+                    <option value="anio">Este año</option>
+                </select>
+            </div>
+
+            <div class="seccion-form">
+                <h5>💰 Historial de Cobros por Servicios (Pedidos)</h5>
+                <div id="lista-operaciones-pedidos" class="admin-list" style="max-height: 350px;">
+                    <p style="color: #777; font-size: 0.9em;">Cargando operaciones de cobro...</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -496,6 +521,35 @@
     </div>
 </div>
 
+<!-- MODAL PARA EDITAR OPERACIÓN / MONTO DE PEDIDO -->
+<div id="modal-editar-pedido" class="modal-overlay">
+    <div class="modal-content">
+        <h3 style="color: var(--primary); margin-top: 0;">✏️ Modificar Operación de Pedido</h3>
+        <form id="form-editar-pedido-op" onsubmit="guardarEdicionPedidoOp(event)">
+            <input type="hidden" id="edit-op-pedido-id">
+            
+            <label style="font-size: 0.85em; font-weight: bold;">Cliente:</label>
+            <input type="text" id="edit-op-cliente" class="input-field" readonly style="background: #e9ecef;">
+
+            <label style="font-size: 0.85em; font-weight: bold;">Monto Pagado ($):</label>
+            <input type="number" step="0.01" id="edit-op-monto" class="input-field" required>
+
+            <label style="font-size: 0.85em; font-weight: bold;">Estatus del Servicio:</label>
+            <select id="edit-op-estatus" class="input-field" required>
+                <option value="pendiente">Pendiente</option>
+                <option value="entregado">Entregado (Alquilada)</option>
+                <option value="completado">Completado</option>
+                <option value="cancelado">Cancelado</option>
+            </select>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="submit" class="btn-secundario" style="flex:1;">💾 Guardar Cambios</button>
+                <button type="button" class="btn-secundario" style="flex:1; background: #6c757d;" onclick="cerrarModal('modal-editar-pedido')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyB1LQOkCw3F5kVOlfRRroX0l4xk-c6_hbs",
@@ -592,6 +646,8 @@
             actualizarFinanzas();
         } else if(tabId === 'tab-estadisticas') {
             actualizarEstadisticas();
+        } else if(tabId === 'tab-operaciones') {
+            actualizarRegistroOperacionesUI();
         }
     }
 
@@ -784,6 +840,7 @@
             actualizarListasAdmin();
             actualizarFinanzas();
             actualizarEstadisticas();
+            actualizarRegistroOperacionesUI();
         });
     }
 
@@ -1022,6 +1079,65 @@
         }
     }
 
+    function actualizarRegistroOperacionesUI() {
+        const listaOpPedidos = document.getElementById('lista-operaciones-pedidos');
+        const rango = document.getElementById('op-rango') ? document.getElementById('op-rango').value : 'mes';
+        let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
+
+        if(listaOpPedidos) {
+            listaOpPedidos.innerHTML = '';
+            if(pedidosFiltrados.length === 0) {
+                listaOpPedidos.innerHTML = '<p style="color:#777; font-size:0.85em;">No hay pedidos registrados en este lapso.</p>';
+            } else {
+                pedidosFiltrados.forEach(p => {
+                    let div = document.createElement('div');
+                    div.className = 'admin-item';
+                    div.innerHTML = `
+                        <span><b>${p.clienteNombre || 'Cliente'}</b> (Lav: N° ${p.lavadoraAsignada || 'N/A'}) - Monto: <b style="color:var(--accent);">$${p.montoPagado ? parseFloat(p.montoPagado).toFixed(2) : '0.00'}</b> [${p.estatus.toUpperCase()}]</span>
+                        <div>
+                            <button class="btn-accion" style="padding:4px 8px; font-size:0.75em;" onclick="abrirModalEditarPedidoOp('${p.id}')">✏️ Editar</button>
+                            <button class="btn-peligro" style="padding:4px 8px; font-size:0.75em;" onclick="eliminarPedidoOp('${p.id}')">🗑️</button>
+                        </div>
+                    `;
+                    listaOpPedidos.appendChild(div);
+                });
+            }
+        }
+    }
+
+    function abrirModalEditarPedidoOp(id) {
+        let p = dbPedidos.find(item => item.id === id);
+        if(!p) return;
+        document.getElementById('edit-op-pedido-id').value = p.id;
+        document.getElementById('edit-op-cliente').value = p.clienteNombre || 'Cliente';
+        document.getElementById('edit-op-monto').value = p.montoPagado || 0;
+        document.getElementById('edit-op-estatus').value = p.estatus || 'pendiente';
+        document.getElementById('modal-editar-pedido').style.display = 'flex';
+    }
+
+    function guardarEdicionPedidoOp(event) {
+        event.preventDefault();
+        let id = document.getElementById('edit-op-pedido-id').value;
+        let nuevoMonto = parseFloat(document.getElementById('edit-op-monto').value) || 0;
+        let nuevoEstatus = document.getElementById('edit-op-estatus').value;
+
+        db.collection("pedidos").doc(id).update({
+            montoPagado: nuevoMonto,
+            estatus: nuevoEstatus
+        }).then(() => {
+            cerrarModal('modal-editar-pedido');
+            alert('¡Operación de pedido actualizada correctamente!');
+        });
+    }
+
+    function eliminarPedidoOp(id) {
+        if(confirm('¿Está seguro de eliminar este registro de pedido y su operación financiera?')) {
+            db.collection("pedidos").doc(id).delete().then(() => {
+                alert('Registro de pedido eliminado con éxito.');
+            });
+        }
+    }
+
     function filtrarPorRangoFecha(lista, campoFechaStr, rango) {
         let ahora = new Date();
         return lista.filter(item => {
@@ -1067,7 +1183,6 @@
         });
         document.getElementById('fin-dinero-entrado').textContent = `$${dineroEntrado.toFixed(2)}`;
 
-        // Mantenimiento de vehículo basado en 210000
         let mantBase = parseFloat(document.getElementById('fin-mantenimiento-base').value) || 210000;
         let mantCalculado = mantBase;
         if (rango === 'anio') {
