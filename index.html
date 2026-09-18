@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Gestión - Panel Operativo</title>
+    <title>Portal de Gestión </title>
     
     <!-- 1. SDKs de Firebase (App, Firestore y Analytics) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -69,8 +69,8 @@
 <body>
 
 <header>
-    <h1>GESTIÓN DE SERVICIOS Y LOGÍSTICA</h1>
-    <p>Portal de Control Operativo - Lavarapido</p>
+    <h1>LAVARAPIDO</h1>
+    <p>Portal de Control Operativo</p>
 </header>
 
 <div class="container">
@@ -310,8 +310,8 @@
                 <div id="resultado-stats-lavadora" style="background: #e8eaf6; padding: 12px; border-radius: 8px; margin-top: 10px; display: none; font-size: 0.9em;">
                     <p><b>Cantidad de servicios realizados:</b> <span id="stat-lav-servicios">0</span></p>
                     <p><b>Cantidad de dinero generado:</b> $<span id="stat-lav-dinero">0.00</span></p>
-                    <p style="margin-top: 8px;"><b>Listado de repuestos metidos a esta lavadora en el lapso:</b></p>
-                    <div id="stat-lav-repuestos-list" class="admin-list" style="max-height: 120px; background: white; margin-top: 5px;"></div>
+                    <p style="margin-top: 8px;"><b>Listado de repuestos (con fecha de adquisición) e incidencias generadas:</b></p>
+                    <div id="stat-lav-repuestos-list" class="admin-list" style="max-height: 150px; background: white; margin-top: 5px;"></div>
                 </div>
             </div>
         </div>
@@ -1090,7 +1090,6 @@
         const rango = document.getElementById('op-rango') ? document.getElementById('op-rango').value : 'mes';
         let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
 
-        // Ordenar cronológicamente por fecha de entrega (ascendente: más antiguo a más reciente, o descendiente si se prefiere. Aquí cronológico estándar: de menor a mayor fecha)
         pedidosFiltrados.sort((a, b) => {
             let fechaA = new Date(a.fechaEntrega || 0);
             let fechaB = new Date(b.fechaEntrega || 0);
@@ -1289,7 +1288,7 @@
             arrayLavadorasRanking.forEach((l, idx) => {
                 let div = document.createElement('div');
                 div.className = 'admin-item';
-                div.innerHTML = `<span><b>#${idx+1} Lavadora N° ${l.numero}</b></span> <span><b>${l.servicios}</b> servicios ($${l.dinero.toFixed(2)})</span>`;
+                div.innerHTML = `<span><b>#${idx+1} Lavadora N° ${l.numero}</b></span> <span><b>${l.servicios}</b> services ($${l.dinero.toFixed(2)})</span>`;
                 listRankingLav.appendChild(div);
             });
             if(arrayLavadorasRanking.length === 0) {
@@ -1450,16 +1449,35 @@
         let repuestosLapso = filtrarPorRangoFecha(dbGastosRepuestos, 'fecha', rango);
         let repuestosLavadora = repuestosLapso.filter(r => r.lavadoraNum == lavadoraNum);
 
+        // También filtramos las incidencias de los pedidos asociados a esta lavadora en el lapso seleccionado
+        let incidenciasLavadora = pedidosLapso.filter(p => p.lavadoraAsignada == lavadoraNum && p.estadoIncidencia === 'si hubo incidencia');
+
         let listaRepContenedor = document.getElementById('stat-lav-repuestos-list');
         listaRepContenedor.innerHTML = '';
+
+        // Mostrar repuestos con su fecha de adquisición
         repuestosLavadora.forEach(r => {
+            let fechaRepFmt = formatearFechaDMY(r.fecha);
             let div = document.createElement('div');
             div.className = 'admin-item';
-            div.innerHTML = `<span>⚙️ <b>${r.nombre}</b> - Costo: $${r.costo} (Pagado por: ${r.pagadoPor})</span>`;
+            div.innerHTML = `<span>⚙️ <b>${r.nombre}</b> (Adquirido: ${fechaRepFmt}) - Costo: $${r.costo} (Pagado por: ${r.pagadoPor})</span>`;
             listaRepContenedor.appendChild(div);
         });
-        if(repuestosLavadora.length === 0) {
-            listaRepContenedor.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">Sin repuestos registrados en este lapso.</p>';
+
+        // Mostrar incidencias generadas con cliente y fecha
+        incidenciasLavadora.forEach(inc => {
+            let fechaIncFmt = formatearFechaDMY(inc.fechaRetiro || inc.fechaEntrega);
+            let clienteInc = inc.clienteNombre || 'Cliente desconocido';
+            let descInc = inc.descripcionIncidencia || 'Sin descripción';
+            let div = document.createElement('div');
+            div.className = 'admin-item';
+            div.style.background = '#ffebee';
+            div.innerHTML = `<span>⚠️ <b>Incidencia:</b> ${descInc} | <b>Cliente:</b> ${clienteInc} | <b>Fecha:</b> ${fechaIncFmt}</span>`;
+            listaRepContenedor.appendChild(div);
+        });
+
+        if(repuestosLavadora.length === 0 && incidenciasLavadora.length === 0) {
+            listaRepContenedor.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">Sin repuestos ni incidencias registrados en este lapso.</p>';
         }
 
         document.getElementById('stat-lav-servicios').textContent = cantServicios;
