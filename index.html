@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Gestión LAVARAPIDO</title>
+    <title>Portal de Gestión - Panel Operativo</title>
     
     <!-- 1. SDKs de Firebase (App, Firestore y Analytics) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -91,13 +91,19 @@
             
             <form id="form-agregar-pedido" onsubmit="guardarPedido(event)">
                 <div class="seccion-form">
-                    <h5>1. Cliente</h5>
+                    <h5>1. Cliente (Buscador Predictivo)</h5>
                     <div class="flex-row">
-                        <select id="ped-cliente" class="input-field" required>
-                            <option value="" disabled selected>-- Seleccione un cliente --</option>
-                        </select>
+                        <!-- Input de búsqueda interactiva (mínimo 3 letras) -->
+                        <div style="position: relative; flex-grow: 1;">
+                            <input type="text" id="busqueda-cliente-input" class="input-field" placeholder="🔍 Escribe al menos 3 letras del nombre o teléfono..." autocomplete="off" style="margin-bottom: 0;" oninput="filtrarClientesAutocomplete(this.value)">
+                            <input type="hidden" id="ped-cliente" required>
+                            
+                            <!-- Lista flotante de sugerencias -->
+                            <div id="lista-sugerencias-clientes" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+                        </div>
                         <button type="button" class="btn-icon" title="Agregar nuevo cliente" onclick="toggleFormCliente()">➕</button>
                     </div>
+                    <div id="cliente-seleccionado-badge" style="margin-top: 8px; font-size: 0.85em; color: var(--accent); font-weight: bold; display: none;"></div>
 
                     <div id="seccion-nuevo-cliente" style="display: none; background: #f1f8e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px dashed var(--accent);">
                         <strong style="font-size: 0.85em; color: var(--accent);">Registrar Nuevo Cliente Rápido:</strong>
@@ -228,17 +234,17 @@
             </div>
 
             <div class="seccion-form" style="background: #e8eaf6; border-color: #c5cae9;">
-                <h5 style="color: var(--primary);">⚖️ Distribución de la Ganancia</h5>
+                <h5 style="color: var(--primary);">⚖️ Distribución de la Ganancia / Pérdida</h5>
                 <p style="font-size: 0.9em; margin-bottom: 8px;"><b>Operador se llevará el siguiente monto desglozado:</b></p>
                 <ul style="font-size: 0.9em; padding-left: 20px; margin-top: 0;">
                     <li>Mantenimiento de vehículo: <span id="dist-mantenimiento">0</span></li>
                     <li>Repuestos (pagados por operador): <span id="dist-repuestos-operador">0</span></li>
-                    <li>50% del restante: <span id="dist-50-restante">0</span></li>
+                    <li>50% del excedente / pérdida restante: <span id="dist-mitad-balance">0</span></li>
                 </ul>
                 <p style="font-size: 1em; font-weight: bold; color: var(--primary);">Total para Operador: <span id="dist-total-operador">0</span></p>
 
                 <hr style="border: 0; border-top: 1px solid #c5cae9; margin: 10px 0;">
-                <p style="font-size: 0.9em; font-weight: bold; color: var(--accent);">Total para Lavarapido (50% del restante + Repuestos pagados por Lavarapido): <span id="dist-total-lavarapido">0</span></p>
+                <p style="font-size: 0.9em; font-weight: bold; color: var(--accent);">Total para Lavarapido (50% del excedente / pérdida restante + Repuestos pagados por Lavarapido): <span id="dist-total-lavarapido">0</span></p>
             </div>
         </div>
 
@@ -256,6 +262,12 @@
                     <option value="ultimos tres meses">Últimos tres meses</option>
                     <option value="anio">Este año</option>
                 </select>
+            </div>
+
+            <!-- SECCIÓN: Ranking de Todas las Lavadoras por Servicios -->
+            <div class="seccion-form">
+                <h5 style="color: var(--primary);">🏆 Ranking de Todas las Lavadoras por Cantidad de Servicios</h5>
+                <div id="ranking-todas-lavadoras" class="admin-list" style="max-height: 200px;"></div>
             </div>
 
             <!-- SECCIÓN: Estadísticas de Motivos de Cancelación -->
@@ -546,7 +558,6 @@
                     event.respondWith(
                         caches.match(event.request).then(response => {
                             return response || fetch(event.request).catch(() => {
-                                // Fallback para solicitudes de navegación si está offline
                                 return caches.match('./');
                             });
                         })
@@ -628,6 +639,65 @@
         }
     }
 
+    // --- AUTOCOMPLETE INTERACTIVO DE CLIENTES (MÍNIMO 3 LETRAS) ---
+    function filtrarClientesAutocomplete(texto) {
+        const contenedorSugerencias = document.getElementById('lista-sugerencias-clientes');
+        const textoFiltro = texto.toLowerCase().trim();
+        
+        if (textoFiltro.length < 3) {
+            contenedorSugerencias.style.display = 'none';
+            document.getElementById('ped-cliente').value = '';
+            document.getElementById('cliente-seleccionado-badge').style.display = 'none';
+            return;
+        }
+
+        const resultados = dbClientes.filter(cli => {
+            const nombre = cli.nombre ? cli.nombre.toLowerCase() : '';
+            const telefono = cli.telefono ? cli.telefono.toLowerCase() : '';
+            return nombre.includes(textoFiltro) || telefono.includes(textoFiltro);
+        });
+
+        contenedorSugerencias.innerHTML = '';
+
+        if (resultados.length === 0) {
+            contenedorSugerencias.innerHTML = '<div style="padding: 10px; color: #777; font-size: 0.85em;">No se encontraron clientes (mínimo 3 letras)</div>';
+            contenedorSugerencias.style.display = 'block';
+            return;
+        }
+
+        resultados.forEach(cli => {
+            let div = document.createElement('div');
+            div.style.padding = '10px';
+            div.style.cursor = 'pointer';
+            div.style.borderBottom = '1px solid #eee';
+            div.style.fontSize = '0.9em';
+            div.innerHTML = `<b>${cli.nombre}</b> <span style="color: #666;">(Tel: ${cli.telefono})</span>`;
+            div.onclick = () => seleccionarClienteAutocomplete(cli.id, cli.nombre, cli.telefono);
+            div.onmouseover = () => div.style.background = '#f8f9fa';
+            div.onmouseout = () => div.style.background = 'white';
+            contenedorSugerencias.appendChild(div);
+        });
+
+        contenedorSugerencias.style.display = 'block';
+    }
+
+    function seleccionarClienteAutocomplete(id, nombre, telefono) {
+        document.getElementById('ped-cliente').value = id;
+        document.getElementById('busqueda-cliente-input').value = `${nombre} - Tel: ${telefono}`;
+        document.getElementById('lista-sugerencias-clientes').style.display = 'none';
+        
+        const badge = document.getElementById('cliente-seleccionado-badge');
+        badge.textContent = `✔ Cliente seleccionado correctamente`;
+        badge.style.display = 'block';
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#busqueda-cliente-input') && !e.target.closest('#lista-sugerencias-clientes')) {
+            const sugerencias = document.getElementById('lista-sugerencias-clientes');
+            if (sugerencias) sugerencias.style.display = 'none';
+        }
+    });
+
     // --- FUNCIONES DE FORMATEO DE FECHA DÍA MES AÑO ---
     function formatearFechaDMY(fechaIsoStr) {
         if (!fechaIsoStr) return 'Sin fecha';
@@ -671,7 +741,6 @@
         db.collection("clientes").onSnapshot((snapshot) => {
             dbClientes = [];
             snapshot.forEach((doc) => { dbClientes.push({ id: doc.id, ...doc.data() }); });
-            actualizarSelectClientes();
             actualizarListasAdmin();
             actualizarSelectsEstadisticas();
         });
@@ -742,17 +811,6 @@
     }
 
     // --- ACTUALIZACIÓN DE VISTAS ---
-
-    function actualizarSelectClientes() {
-        const select = document.getElementById('ped-cliente');
-        select.innerHTML = '<option value="" disabled selected>-- Seleccione un cliente --</option>';
-        dbClientes.forEach(cli => {
-            let opt = document.createElement('option');
-            opt.value = cli.id;
-            opt.textContent = `${cli.nombre} - Tel: ${cli.telefono}`;
-            select.appendChild(opt);
-        });
-    }
 
     function actualizarSelectLavadoras() {
         const selectLav = document.getElementById('ped-lavadora');
@@ -1072,7 +1130,7 @@
             listaRepLavarapido.innerHTML = '<p style="color: #777; font-size: 0.85em; margin: 5px;">Ningún repuesto pagado por Lavarapido en este lapso.</p>';
         }
 
-        // Distribución de la ganancia
+        // Distribución de la ganancia o pérdida
         let repuestosOperador = 0;
         repuestosFiltrados.forEach(r => {
             if(r.pagadoPor === 'operador') {
@@ -1080,16 +1138,16 @@
             }
         });
 
-        let restante = dineroEntrado - (mantCalculado / 1000) - totalRepuestos;
-        if (restante < 0) restante = 0;
-        let mitadRestante = restante / 2;
+        let totalGastosBaseConv = (mantCalculado / 1000);
+        let balanceRestante = dineroEntrado - totalGastosBaseConv - totalRepuestos;
+        let mitadBalance = balanceRestante / 2;
 
-        let totalOperador = mantCalculado + repuestosOperador + mitadRestante;
-        let totalLavarapido = mitadRestante + totalRepLavarapido;
+        let totalOperador = (mantCalculado / 1000) + repuestosOperador + mitadBalance;
+        let totalLavarapido = totalRepLavarapido + mitadBalance;
 
         document.getElementById('dist-mantenimiento').textContent = mantCalculado.toLocaleString();
         document.getElementById('dist-repuestos-operador').textContent = repuestosOperador.toFixed(2);
-        document.getElementById('dist-50-restante').textContent = mitadRestante.toFixed(2);
+        document.getElementById('dist-mitad-balance').textContent = mitadBalance.toFixed(2);
         document.getElementById('dist-total-operador').textContent = totalOperador.toLocaleString();
         document.getElementById('dist-total-lavarapido').textContent = totalLavarapido.toFixed(2);
     }
@@ -1099,7 +1157,41 @@
         const rango = document.getElementById('est-rango').value;
         let pedidosLapso = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
 
-        // 1. Estadísticas de motivos de cancelación
+        let statsLavadoras = {};
+        dbLavadoras.forEach(l => {
+            statsLavadoras[l.numero] = { numero: l.numero, servicios: 0, dinero: 0 };
+        });
+
+        pedidosLapso.forEach(p => {
+            if (p.estatus !== 'cancelado' && (p.estatus === 'entregado' || p.estatus === 'completado')) {
+                let numLav = p.lavadoraAsignada;
+                if(numLav) {
+                    if(!statsLavadoras[numLav]) {
+                        statsLavadoras[numLav] = { numero: numLav, servicios: 0, dinero: 0 };
+                    }
+                    statsLavadoras[numLav].servicios++;
+                    if(p.montoPagado) {
+                        statsLavadoras[numLav].dinero += parseFloat(p.montoPagado) || 0;
+                    }
+                }
+            }
+        });
+
+        let arrayLavadorasRanking = Object.values(statsLavadoras).sort((a, b) => b.servicios - a.servicios);
+        let listRankingLav = document.getElementById('ranking-todas-lavadoras');
+        if(listRankingLav) {
+            listRankingLav.innerHTML = '';
+            arrayLavadorasRanking.forEach((l, idx) => {
+                let div = document.createElement('div');
+                div.className = 'admin-item';
+                div.innerHTML = `<span><b>#${idx+1} Lavadora N° ${l.numero}</b></span> <span><b>${l.servicios}</b> servicios ($${l.dinero.toFixed(2)})</span>`;
+                listRankingLav.appendChild(div);
+            });
+            if(arrayLavadorasRanking.length === 0) {
+                listRankingLav.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">Sin servicios registrados en este lapso.</p>';
+            }
+        }
+
         let conteoMotivos = {};
         dbMotivos.forEach(m => conteoMotivos[m.texto] = 0);
         
@@ -1125,7 +1217,6 @@
             listCancelaciones.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">No hay lavadoras canceladas registradas en este lapso.</p>';
         }
 
-        // Agrupar por cliente
         let statsClientes = {};
         dbClientes.forEach(c => {
             statsClientes[c.id] = { nombre: c.nombre, dinero: 0, incidencias: 0, servicios: 0, fechasServicios: [] };
@@ -1153,7 +1244,6 @@
 
         let arrayClientes = Object.values(statsClientes);
 
-        // Top 3 Dinero
         let topDinero = [...arrayClientes].sort((a, b) => b.dinero - a.dinero).slice(0, 3);
         let listTopDinero = document.getElementById('top-clientes-dinero');
         listTopDinero.innerHTML = '';
@@ -1167,7 +1257,6 @@
             listTopDinero.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">Sin datos en este lapso.</p>';
         }
 
-        // Top 3 Incidencias
         let topIncidencias = [...arrayClientes].sort((a, b) => b.incidencias - a.incidencias).slice(0, 3);
         let listTopInc = document.getElementById('top-clientes-incidencias');
         listTopInc.innerHTML = '';
@@ -1419,9 +1508,14 @@
 
     function guardarPedido(event) {
         event.preventDefault();
-        const clienteSelect = document.getElementById('ped-cliente');
-        const clienteId = clienteSelect.value;
-        const clienteNombre = clienteSelect.options[clienteSelect.selectedIndex].text;
+        const clienteId = document.getElementById('ped-cliente').value;
+        const clienteInputTexto = document.getElementById('busqueda-cliente-input').value;
+        
+        if(!clienteId) {
+            alert('Seleccione un cliente válido utilizando el buscador predictivo.');
+            return;
+        }
+
         const fechaEntrega = document.getElementById('ped-fecha-entrega').value;
         const tiempoAlquiler = document.getElementById('ped-tiempo').value;
         const lavadoraNum = document.getElementById('ped-lavadora').value;
@@ -1430,7 +1524,7 @@
 
         db.collection("pedidos").add({
             clienteId: clienteId,
-            clienteNombre: clienteNombre,
+            clienteNombre: clienteInputTexto,
             fechaEntrega: fechaEntrega,
             tiempoAlquiler: tiempoAlquiler,
             lavadoraAsignada: lavadoraNum,
@@ -1439,6 +1533,8 @@
         }).then(() => {
             alert('¡Pedido registrado con éxito! Lavadora marcada como comprometida.');
             document.getElementById('form-agregar-pedido').reset();
+            document.getElementById('busqueda-cliente-input').value = '';
+            document.getElementById('cliente-seleccionado-badge').style.display = 'none';
         });
     }
 
