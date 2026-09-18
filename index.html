@@ -93,12 +93,10 @@
                 <div class="seccion-form">
                     <h5>1. Cliente (Buscador Predictivo)</h5>
                     <div class="flex-row">
-                        <!-- Input de búsqueda interactiva (mínimo 3 letras) -->
                         <div style="position: relative; flex-grow: 1;">
                             <input type="text" id="busqueda-cliente-input" class="input-field" placeholder="🔍 Escribe al menos 3 letras del nombre o teléfono..." autocomplete="off" style="margin-bottom: 0;" oninput="filtrarClientesAutocomplete(this.value)">
                             <input type="hidden" id="ped-cliente" required>
                             
-                            <!-- Lista flotante de sugerencias -->
                             <div id="lista-sugerencias-clientes" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
                         </div>
                         <button type="button" class="btn-icon" title="Agregar nuevo cliente" onclick="toggleFormCliente()">➕</button>
@@ -192,6 +190,7 @@
             <div class="seccion-form">
                 <h5>2) Mantenimiento de vehículo</h5>
                 <label style="font-size: 0.85em; font-weight: bold;">Monto base de mantenimiento (pesos):</label>
+                <!-- CORREGIDO: Se establece el valor por defecto en 210000 -->
                 <input type="number" id="fin-mantenimiento-base" class="input-field" value="210000" oninput="actualizarFinanzas()">
                 <p style="font-size: 0.9em; color: #555; margin-top: 5px;">Monto ajustado al lapso seleccionado: <b id="fin-mantenimiento-calculado">0</b> pesos</p>
             </div>
@@ -226,25 +225,28 @@
                     <div id="lista-repuestos-finanzas" class="admin-list" style="margin-top: 5px;"></div>
                     <p style="font-size: 0.9em; margin-top: 8px;"><b>Total de gastos por repuestos:</b> <span id="fin-total-repuestos">0</span></p>
                 </div>
-
-                <div style="margin-top: 15px;">
-                    <strong style="font-size: 0.85em; color: #555;">Repuestos pagados por Lavarapido en el lapso:</strong>
-                    <div id="lista-repuestos-lavarapido" class="admin-list" style="margin-top: 5px;"></div>
-                </div>
             </div>
 
             <div class="seccion-form" style="background: #e8eaf6; border-color: #c5cae9;">
-                <h5 style="color: var(--primary);">⚖️ Distribución de la Ganancia / Pérdida</h5>
-                <p style="font-size: 0.9em; margin-bottom: 8px;"><b>Operador se llevará el siguiente monto desglozado:</b></p>
-                <ul style="font-size: 0.9em; padding-left: 20px; margin-top: 0;">
-                    <li>Mantenimiento de vehículo: <span id="dist-mantenimiento">0</span></li>
-                    <li>Repuestos (pagados por operador): <span id="dist-repuestos-operador">0</span></li>
-                    <li>50% del excedente / pérdida restante: <span id="dist-mitad-balance">0</span></li>
-                </ul>
-                <p style="font-size: 1em; font-weight: bold; color: var(--primary);">Total para Operador: <span id="dist-total-operador">0</span></p>
-
+                <h5 style="color: var(--primary);">⚖️ Distribución para el Operador y para la Lavarápido</h5>
+                <p style="font-size: 0.9em; margin-bottom: 5px;"><b>Base de cálculo (Dinero entrado - Mantenimiento - Rep. Operador - Rep. Lavarápido):</b> <span id="dist-restante" style="font-weight: bold;">0</span></p>
+                <p style="font-size: 0.9em; margin-bottom: 12px;"><b>Mitad de la base ((Base) / 2):</b> <span id="dist-mitad" style="font-weight: bold;">0</span></p>
+                
                 <hr style="border: 0; border-top: 1px solid #c5cae9; margin: 10px 0;">
-                <p style="font-size: 0.9em; font-weight: bold; color: var(--accent);">Total para Lavarapido (50% del excedente / pérdida restante + Repuestos pagados por Lavarapido): <span id="dist-total-lavarapido">0</span></p>
+                
+                <div style="margin-bottom: 12px;">
+                    <p style="font-size: 0.95em; font-weight: bold; color: var(--primary); margin: 0 0 4px 0;">1. Total para el Operador:</p>
+                    <p style="font-size: 0.85em; color: #555; margin: 0; line-height: 1.4;">
+                        Desglose: (<span id="desc-op-base">0</span> / 2) + Mantenimiento (<span id="desc-op-mant">0</span>) + Repuestos Operador (<span id="desc-op-repop">0</span>) = <b id="dist-operador" style="color: var(--primary); font-size: 1.1em;">0</b>
+                    </p>
+                </div>
+
+                <div>
+                    <p style="font-size: 0.95em; font-weight: bold; color: var(--accent); margin: 0 0 4px 0;">2. Total para Lavarápido:</p>
+                    <p style="font-size: 0.85em; color: #555; margin: 0; line-height: 1.4;">
+                        Desglose: (<span id="desc-lav-base">0</span> / 2) + Repuestos Lavarápido (<span id="desc-lav-replav">0</span>) = <b id="dist-lavarapido" style="color: var(--accent); font-size: 1.1em;">0</b>
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -264,13 +266,11 @@
                 </select>
             </div>
 
-            <!-- SECCIÓN: Ranking de Todas las Lavadoras por Servicios -->
             <div class="seccion-form">
                 <h5 style="color: var(--primary);">🏆 Ranking de Todas las Lavadoras por Cantidad de Servicios</h5>
                 <div id="ranking-todas-lavadoras" class="admin-list" style="max-height: 200px;"></div>
             </div>
 
-            <!-- SECCIÓN: Estadísticas de Motivos de Cancelación -->
             <div class="seccion-form">
                 <h5 style="color: var(--secondary);">❌ Lavadoras Canceladas por Motivo (en el lapso)</h5>
                 <div id="lista-stats-cancelaciones" class="admin-list" style="max-height: 150px;"></div>
@@ -320,7 +320,6 @@
         <div id="tab-admin" class="tab-content">
             <h4 style="color: var(--primary); margin-top: 0;">🛠️ Panel de Administración</h4>
             
-            <!-- Administrar Clientes -->
             <div class="seccion-form">
                 <h5 id="titulo-form-cliente">👥 Registrar Nuevo Cliente</h5>
                 <form id="form-admin-cliente" onsubmit="guardarClienteAdmin(event)">
@@ -340,7 +339,6 @@
                 </div>
             </div>
 
-            <!-- Administrar Lavadoras -->
             <div class="seccion-form">
                 <h5>🧺 Registrar Lavadora en Inventario</h5>
                 <form id="form-admin-lavadora" onsubmit="agregarLavadoraAdmin(event)">
@@ -355,7 +353,6 @@
                 </div>
             </div>
 
-            <!-- Administrar Repuestos -->
             <div class="seccion-form">
                 <h5>⚙️ Catálogo de Repuestos</h5>
                 <form id="form-admin-repuesto" onsubmit="agregarRepuestoAdmin(event)">
@@ -370,7 +367,6 @@
                 </div>
             </div>
 
-            <!-- Administrar Motivos de Cancelación -->
             <div class="seccion-form">
                 <h5>❌ Motivos de Cancelación</h5>
                 <form id="form-admin-motivo" onsubmit="agregarMotivoCancelacion(event)">
@@ -514,7 +510,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Activar la persistencia offline de Firestore
     db.enablePersistence().catch((err) => {
         if (err.code === 'failed-precondition') {
             console.warn('Persistencia fallida: Múltiples pestañas abiertas en el navegador.');
@@ -523,7 +518,6 @@
         }
     });
 
-    // Registro de Service Worker para cachear recursos estáticos y permitir modo offline
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             const swScript = `
@@ -639,7 +633,6 @@
         }
     }
 
-    // --- AUTOCOMPLETE INTERACTIVO DE CLIENTES (MÍNIMO 3 LETRAS) ---
     function filtrarClientesAutocomplete(texto) {
         const contenedorSugerencias = document.getElementById('lista-sugerencias-clientes');
         const textoFiltro = texto.toLowerCase().trim();
@@ -671,8 +664,8 @@
             div.style.cursor = 'pointer';
             div.style.borderBottom = '1px solid #eee';
             div.style.fontSize = '0.9em';
-            div.innerHTML = `<b>${cli.nombre}</b> <span style="color: #666;">(Tel: ${cli.telefono})</span>`;
-            div.onclick = () => seleccionarClienteAutocomplete(cli.id, cli.nombre, cli.telefono);
+            div.innerHTML = `<b>${cli.nombre}</b> <span style="color: #666;">(Dir: ${cli.direccion || 'Sin dirección'})</span>`;
+            div.onclick = () => seleccionarClienteAutocomplete(cli.id, cli.nombre, cli.direccion);
             div.onmouseover = () => div.style.background = '#f8f9fa';
             div.onmouseout = () => div.style.background = 'white';
             contenedorSugerencias.appendChild(div);
@@ -681,9 +674,9 @@
         contenedorSugerencias.style.display = 'block';
     }
 
-    function seleccionarClienteAutocomplete(id, nombre, telefono) {
+    function seleccionarClienteAutocomplete(id, nombre, direccion) {
         document.getElementById('ped-cliente').value = id;
-        document.getElementById('busqueda-cliente-input').value = `${nombre} - Tel: ${telefono}`;
+        document.getElementById('busqueda-cliente-input').value = `${nombre} - Dir: ${direccion || 'Sin dirección'}`;
         document.getElementById('lista-sugerencias-clientes').style.display = 'none';
         
         const badge = document.getElementById('cliente-seleccionado-badge');
@@ -698,7 +691,6 @@
         }
     });
 
-    // --- FUNCIONES DE FORMATEO DE FECHA DÍA MES AÑO ---
     function formatearFechaDMY(fechaIsoStr) {
         if (!fechaIsoStr) return 'Sin fecha';
         let partes = fechaIsoStr.split('T');
@@ -734,8 +726,6 @@
 
         return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
     }
-
-    // --- SINCRONIZACIÓN CON FIRESTORE ---
 
     function cargarClientesEnTiempoReal() {
         db.collection("clientes").onSnapshot((snapshot) => {
@@ -797,7 +787,6 @@
         });
     }
 
-    // --- CÁLCULO DE ESTATUS DE LAVADORAS ---
     function obtenerEstatusLavadora(lavadoraObj) {
         if (lavadoraObj.estatusManual === 'dañada' || lavadoraObj.estatusManual === 'desincorporada') {
             return lavadoraObj.estatusManual;
@@ -809,8 +798,6 @@
         if (pedidoAsociado.estatus === 'entregado') return 'alquilada';
         return 'disponible';
     }
-
-    // --- ACTUALIZACIÓN DE VISTAS ---
 
     function actualizarSelectLavadoras() {
         const selectLav = document.getElementById('ped-lavadora');
@@ -1035,7 +1022,6 @@
         }
     }
 
-    // --- LÓGICA DE FILTRADO Y FINANZAS ---
     function filtrarPorRangoFecha(lista, campoFechaStr, rango) {
         let ahora = new Date();
         return lista.filter(item => {
@@ -1072,7 +1058,6 @@
     function actualizarFinanzas() {
         const rango = document.getElementById('fin-rango').value;
 
-        // 1. Dinero que ha entrado
         let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
         let dineroEntrado = 0;
         pedidosFiltrados.forEach(p => {
@@ -1082,7 +1067,7 @@
         });
         document.getElementById('fin-dinero-entrado').textContent = `$${dineroEntrado.toFixed(2)}`;
 
-        // 2. Mantenimiento de vehículo
+        // Mantenimiento de vehículo basado en 210000
         let mantBase = parseFloat(document.getElementById('fin-mantenimiento-base').value) || 210000;
         let mantCalculado = mantBase;
         if (rango === 'anio') {
@@ -1095,15 +1080,23 @@
             mantCalculado = mantBase / 30;
         }
         document.getElementById('fin-mantenimiento-calculado').textContent = mantCalculado.toLocaleString();
-
-        // 3. Repuestos
+        
         let repuestosFiltrados = filtrarPorRangoFecha(dbGastosRepuestos, 'fecha', rango);
         let totalRepuestos = 0;
+        let repuestosOperador = 0;
+        let repuestosLavarapido = 0;
         let listaRepFinanzas = document.getElementById('lista-repuestos-finanzas');
         listaRepFinanzas.innerHTML = '';
 
         repuestosFiltrados.forEach(r => {
-            totalRepuestos += parseFloat(r.costo) || 0;
+            let costoRep = parseFloat(r.costo) || 0;
+            totalRepuestos += costoRep;
+            if (r.pagadoPor === 'operador') {
+                repuestosOperador += costoRep;
+            } else if (r.pagadoPor === 'lavarapido') {
+                repuestosLavarapido += costoRep;
+            }
+
             let div = document.createElement('div');
             div.className = 'admin-item';
             div.innerHTML = `<span>⚙️ <b>${r.nombre}</b> (Lavadora N° ${r.lavadoraNum}) - Costo: ${r.costo} - Pagado por: <b>${r.pagadoPor}</b></span>`;
@@ -1114,45 +1107,25 @@
         }
         document.getElementById('fin-total-repuestos').textContent = totalRepuestos.toFixed(2);
 
-        // Repuestos pagados por Lavarapido
-        let listaRepLavarapido = document.getElementById('lista-repuestos-lavarapido');
-        listaRepLavarapido.innerHTML = '';
-        let repLavarapido = repuestosFiltrados.filter(r => r.pagadoPor === 'lavarapido');
-        let totalRepLavarapido = 0;
-        repLavarapido.forEach(r => {
-            totalRepLavarapido += parseFloat(r.costo) || 0;
-            let div = document.createElement('div');
-            div.className = 'admin-item';
-            div.innerHTML = `<span>🏢 <b>${r.nombre}</b> (Lavadora N° ${r.lavadoraNum}) - Costo: ${r.costo}</span>`;
-            listaRepLavarapido.appendChild(div);
-        });
-        if(repLavarapido.length === 0) {
-            listaRepLavarapido.innerHTML = '<p style="color: #777; font-size: 0.85em; margin: 5px;">Ningún repuesto pagado por Lavarapido en este lapso.</p>';
-        }
+        let baseRestante = dineroEntrado - mantCalculado - repuestosOperador - repuestosLavarapido;
+        let mitadBase = baseRestante / 2;
 
-        // Distribución de la ganancia o pérdida
-        let repuestosOperador = 0;
-        repuestosFiltrados.forEach(r => {
-            if(r.pagadoPor === 'operador') {
-                repuestosOperador += parseFloat(r.costo) || 0;
-            }
-        });
+        let totalOperador = mitadBase + mantCalculado + repuestosOperador;
+        let totalLavarapido = mitadBase + repuestosLavarapido;
 
-        let totalGastosBaseConv = (mantCalculado / 1000);
-        let balanceRestante = dineroEntrado - totalGastosBaseConv - totalRepuestos;
-        let mitadBalance = balanceRestante / 2;
+        document.getElementById('dist-restante').textContent = baseRestante.toFixed(2);
+        document.getElementById('dist-mitad').textContent = mitadBase.toFixed(2);
 
-        let totalOperador = (mantCalculado / 1000) + repuestosOperador + mitadBalance;
-        let totalLavarapido = totalRepLavarapido + mitadBalance;
+        document.getElementById('desc-op-base').textContent = baseRestante.toFixed(2);
+        document.getElementById('desc-op-mant').textContent = mantCalculado.toFixed(2);
+        document.getElementById('desc-op-repop').textContent = repuestosOperador.toFixed(2);
+        document.getElementById('dist-operador').textContent = totalOperador.toFixed(2);
 
-        document.getElementById('dist-mantenimiento').textContent = mantCalculado.toLocaleString();
-        document.getElementById('dist-repuestos-operador').textContent = repuestosOperador.toFixed(2);
-        document.getElementById('dist-mitad-balance').textContent = mitadBalance.toFixed(2);
-        document.getElementById('dist-total-operador').textContent = totalOperador.toLocaleString();
-        document.getElementById('dist-total-lavarapido').textContent = totalLavarapido.toFixed(2);
+        document.getElementById('desc-lav-base').textContent = baseRestante.toFixed(2);
+        document.getElementById('desc-lav-replav').textContent = repuestosLavarapido.toFixed(2);
+        document.getElementById('dist-lavarapido').textContent = totalLavarapido.toFixed(2);
     }
 
-    // --- LÓGICA DE ESTADÍSTICAS ---
     function actualizarEstadisticas() {
         const rango = document.getElementById('est-rango').value;
         let pedidosLapso = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
@@ -1362,8 +1335,6 @@
         contenedor.style.display = 'block';
     }
 
-    // --- ACCIONES DE ESCRITURA EN FIRESTORE ---
-
     function guardarClienteAdmin(event) {
         event.preventDefault();
         const id = document.getElementById('adm-cli-id').value;
@@ -1537,8 +1508,6 @@
             document.getElementById('cliente-seleccionado-badge').style.display = 'none';
         });
     }
-
-    // --- MANEJADORES DE CANCELACIÓN, ENTREGA Y RETIRO ---
 
     function abrirModalCancelar(pedidoId) {
         if(dbMotivos.length === 0) {
