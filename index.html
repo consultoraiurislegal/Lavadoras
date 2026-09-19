@@ -121,14 +121,18 @@
 
                 <div class="seccion-form">
                     <h5>3. Tiempo de Alquiler</h5>
-                    <select id="ped-tiempo" class="input-field" required>
-                        <option value="" disabled selected>-- Seleccione duración del servicio --</option>
-                        <option value="6 horas">6 horas</option>
-                        <option value="12 horas">12 horas</option>
-                        <option value="1 día">1 día</option>
-                        <option value="2 días">2 días</option>
-                        <option value="3 días">3 días</option>
+                    <select id="ped-tiempo-tipo" class="input-field" onchange="actualizarSelectorTiempo()" required>
+                        <option value="" disabled selected>-- Seleccione tipo de duración --</option>
+                        <option value="horas">Horas (6h / 12h)</option>
+                        <option value="dia">Días específicos</option>
+                        <option value="semana">Semanas específicas</option>
+                        <option value="mes">Meses específicos</option>
+                        <option value="anio">Años específicos</option>
+                        <option value="personalizado">Personalizado (Fechas / Horas exactas)</option>
                     </select>
+
+                    <div id="contenedor-subtiempo" style="margin-top: 10px;"></div>
+                    <input type="hidden" id="ped-tiempo" required>
                 </div>
 
                 <div class="seccion-form">
@@ -173,14 +177,20 @@
             
             <div class="seccion-form">
                 <h5>📅 Rango de Tiempo</h5>
-                <select id="fin-rango" class="input-field" onchange="actualizarFinanzas()">
+                <select id="fin-rango" class="input-field" onchange="manejarCambioRangoTiempo('fin')">
                     <option value="hoy">Hoy</option>
                     <option value="ayer">Ayer</option>
                     <option value="esta semana">Esta semana</option>
                     <option value="mes" selected>Este mes</option>
                     <option value="ultimos tres meses">Últimos tres meses</option>
                     <option value="anio">Este año</option>
+                    <option value="dia_especifico">Seleccionar un día en específico</option>
+                    <option value="semana_especifica">Seleccionar una semana en específico</option>
+                    <option value="mes_especifico">Seleccionar un mes en específico</option>
+                    <option value="anio_especifico">Seleccionar un año en específico</option>
+                    <option value="personalizado">Tiempo personalizado</option>
                 </select>
+                <div id="fin-contenedor-filtros-extra" style="margin-top: 10px;"></div>
             </div>
 
             <div class="seccion-form">
@@ -256,14 +266,20 @@
             
             <div class="seccion-form">
                 <h5>📅 Lapso de Tiempo</h5>
-                <select id="est-rango" class="input-field" onchange="actualizarEstadisticas()">
+                <select id="est-rango" class="input-field" onchange="manejarCambioRangoTiempo('est')">
                     <option value="hoy">Hoy</option>
                     <option value="ayer">Ayer</option>
                     <option value="esta semana">Esta semana</option>
                     <option value="mes" selected>Este mes</option>
                     <option value="ultimos tres meses">Últimos tres meses</option>
                     <option value="anio">Este año</option>
+                    <option value="dia_especifico">Seleccionar un día en específico</option>
+                    <option value="semana_especifica">Seleccionar una semana en específico</option>
+                    <option value="mes_especifico">Seleccionar un mes en específico</option>
+                    <option value="anio_especifico">Seleccionar un año en específico</option>
+                    <option value="personalizado">Tiempo personalizado</option>
                 </select>
+                <div id="est-contenedor-filtros-extra" style="margin-top: 10px;"></div>
             </div>
 
             <div class="seccion-form">
@@ -389,14 +405,20 @@
             
             <div class="seccion-form">
                 <h5>📅 Lapso de Tiempo</h5>
-                <select id="op-rango" class="input-field" onchange="actualizarRegistroOperacionesUI()">
+                <select id="op-rango" class="input-field" onchange="manejarCambioRangoTiempo('op')">
                     <option value="hoy">Hoy</option>
                     <option value="ayer">Ayer</option>
                     <option value="esta semana">Esta semana</option>
                     <option value="mes" selected>Este mes</option>
                     <option value="ultimos tres meses">Últimos tres meses</option>
                     <option value="anio">Este año</option>
+                    <option value="dia_especifico">Seleccionar un día en específico</option>
+                    <option value="semana_especifica">Seleccionar una semana en específico</option>
+                    <option value="mes_especifico">Seleccionar un mes en específico</option>
+                    <option value="anio_especifico">Seleccionar un año en específico</option>
+                    <option value="personalizado">Tiempo personalizado</option>
                 </select>
+                <div id="op-contenedor-filtros-extra" style="margin-top: 10px;"></div>
             </div>
 
             <div class="seccion-form">
@@ -648,11 +670,11 @@
         document.getElementById(tabId).classList.add('active');
         evt.currentTarget.classList.add('active');
         if(tabId === 'tab-finanzas') {
-            actualizarFinanzas();
+            manejarCambioRangoTiempo('fin');
         } else if(tabId === 'tab-estadisticas') {
-            actualizarEstadisticas();
+            manejarCambioRangoTiempo('est');
         } else if(tabId === 'tab-operaciones') {
-            actualizarRegistroOperacionesUI();
+            manejarCambioRangoTiempo('op');
         }
     }
 
@@ -692,6 +714,191 @@
             contenedor.style.display = 'none';
             document.getElementById('ret-desc-incidencia').required = false;
         }
+    }
+
+    function actualizarSelectorTiempo() {
+        const tipo = document.getElementById('ped-tiempo-tipo').value;
+        const contenedor = document.getElementById('contenedor-subtiempo');
+        const inputOculto = document.getElementById('ped-tiempo');
+        contenedor.innerHTML = '';
+        inputOculto.value = '';
+
+        if (tipo === 'horas') {
+            contenedor.innerHTML = `
+                <select id="sub-tiempo-val" class="input-field" onchange="document.getElementById('ped-tiempo').value = this.value" required>
+                    <option value="" disabled selected>-- Seleccione cantidad de horas --</option>
+                    <option value="6 horas">6 horas</option>
+                    <option value="12 horas">12 horas</option>
+                </select>
+            `;
+        } else if (tipo === 'dia') {
+            contenedor.innerHTML = `
+                <select id="sub-tiempo-val" class="input-field" onchange="document.getElementById('ped-tiempo').value = this.value" required>
+                    <option value="" disabled selected>-- Seleccione número de días --</option>
+                    <option value="1 día">1 día</option>
+                    <option value="2 días">2 días</option>
+                    <option value="3 días">3 días</option>
+                    <option value="4 días">4 días</option>
+                    <option value="5 días">5 días</option>
+                    <option value="6 días">6 días</option>
+                    <option value="7 días">7 días</option>
+                </select>
+            `;
+        } else if (tipo === 'semana') {
+            contenedor.innerHTML = `
+                <select id="sub-tiempo-val" class="input-field" onchange="document.getElementById('ped-tiempo').value = this.value" required>
+                    <option value="" disabled selected>-- Seleccione número de semanas --</option>
+                    <option value="1 semana">1 semana</option>
+                    <option value="2 semanas">2 semanas</option>
+                    <option value="3 semanas">3 semanas</option>
+                    <option value="4 semanas">4 semanas (1 mes)</option>
+                </select>
+            `;
+        } else if (tipo === 'mes') {
+            contenedor.innerHTML = `
+                <select id="sub-tiempo-val" class="input-field" onchange="document.getElementById('ped-tiempo').value = this.value" required>
+                    <option value="" disabled selected>-- Seleccione número de meses --</option>
+                    <option value="1 mes">1 mes</option>
+                    <option value="2 meses">2 meses</option>
+                    <option value="3 meses">3 meses</option>
+                    <option value="6 meses">6 meses</option>
+                </select>
+            `;
+        } else if (tipo === 'anio') {
+            contenedor.innerHTML = `
+                <select id="sub-tiempo-val" class="input-field" onchange="document.getElementById('ped-tiempo').value = this.value" required>
+                    <option value="" disabled selected>-- Seleccione número de años --</option>
+                    <option value="1 año">1 año</option>
+                </select>
+            `;
+        } else if (tipo === 'personalizado') {
+            contenedor.innerHTML = `
+                <input type="text" id="sub-tiempo-val" class="input-field" placeholder="Ej: 36 horas, 5 días y medio..." oninput="document.getElementById('ped-tiempo').value = this.value" required>
+            `;
+        }
+    }
+
+    function manejarCambioRangoTiempo(prefijo) {
+        const selectRango = document.getElementById(prefijo + '-rango');
+        const contenedorExtra = document.getElementById(prefijo + '-contenedor-filtros-extra');
+        const valor = selectRango.value;
+        contenedorExtra.innerHTML = '';
+
+        const hoyStr = new Date().toISOString().split('T')[0];
+
+        if (valor === 'dia_especifico') {
+            contenedorExtra.innerHTML = `
+                <label style="font-size: 0.85em; font-weight: bold;">Seleccionar Día:</label>
+                <input type="date" id="${prefijo}-input-dia" class="input-field" value="${hoyStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
+            `;
+        } else if (valor === 'mes_especifico') {
+            const anioActual = new Date().getFullYear();
+            const mesActualStr = String(new Date().getMonth() + 1).padStart(2, '0');
+            contenedorExtra.innerHTML = `
+                <label style="font-size: 0.85em; font-weight: bold;">Seleccionar Mes y Año:</label>
+                <input type="month" id="${prefijo}-input-mes" class="input-field" value="${anioActual}-${mesActualStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
+            `;
+        } else if (valor === 'anio_especifico') {
+            const anioActual = new Date().getFullYear();
+            contenedorExtra.innerHTML = `
+                <label style="font-size: 0.85em; font-weight: bold;">Seleccionar Año:</label>
+                <input type="number" id="${prefijo}-input-anio" class="input-field" value="${anioActual}" min="2020" max="2100" onchange="ejecutarActualizacionTab('${prefijo}')">
+            `;
+        } else if (valor === 'semana_especifica') {
+            contenedorExtra.innerHTML = `
+                <label style="font-size: 0.85em; font-weight: bold;">Seleccione una fecha dentro de la semana:</label>
+                <input type="date" id="${prefijo}-input-semana" class="input-field" value="${hoyStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
+            `;
+        } else if (valor === 'personalizado') {
+            contenedorExtra.innerHTML = `
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.85em; font-weight: bold;">Desde:</label>
+                        <input type="date" id="${prefijo}-input-desde" class="input-field" value="${hoyStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.85em; font-weight: bold;">Hasta:</label>
+                        <input type="date" id="${prefijo}-input-hasta" class="input-field" value="${hoyStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
+                    </div>
+                </div>
+            `;
+        }
+        ejecutarActualizacionTab(prefijo);
+    }
+
+    function ejecutarActualizacionTab(prefijo) {
+        if (prefijo === 'fin') {
+            actualizarFinanzas();
+        } else if (prefijo === 'est') {
+            actualizarEstadisticas();
+        } else if (prefijo === 'op') {
+            actualizarRegistroOperacionesUI();
+        }
+    }
+
+    function filtrarPorRangoFecha(lista, campoFechaStr, rango, prefijo) {
+        let ahora = new Date();
+        return lista.filter(item => {
+            let valFecha = item[campoFechaStr];
+            if (!valFecha) return false;
+            let fechaItem = new Date(valFecha);
+            if (isNaN(fechaItem.getTime())) return false;
+
+            if (rango === 'hoy') {
+                return fechaItem.toDateString() === ahora.toDateString();
+            } else if (rango === 'ayer') {
+                let ayer = new Date();
+                ayer.setDate(ahora.getDate() - 1);
+                return fechaItem.toDateString() === ayer.toDateString();
+            } else if (rango === 'esta semana') {
+                let primerDiaSemana = new Date(ahora);
+                let diaSem = ahora.getDay() || 7;
+                primerDiaSemana.setHours(0,0,0,0);
+                primerDiaSemana.setDate(ahora.getDate() - diaSem + 1);
+                return fechaItem >= primerDiaSemana && fechaItem <= ahora;
+            } else if (rango === 'mes') {
+                return fechaItem.getMonth() === ahora.getMonth() && fechaItem.getFullYear() === ahora.getFullYear();
+            } else if (rango === 'ultimos tres meses') {
+                let haceTresMeses = new Date();
+                haceTresMeses.setMonth(ahora.getMonth() - 3);
+                return fechaItem >= haceTresMeses && fechaItem <= ahora;
+            } else if (rango === 'anio') {
+                return fechaItem.getFullYear() === ahora.getFullYear();
+            } else if (rango === 'dia_especifico') {
+                const inputDia = document.getElementById(prefijo + '-input-dia');
+                if (!inputDia || !inputDia.value) return true;
+                return fechaItem.toISOString().split('T')[0] === inputDia.value;
+            } else if (rango === 'mes_especifico') {
+                const inputMes = document.getElementById(prefijo + '-input-mes');
+                if (!inputMes || !inputMes.value) return true;
+                let [anioSel, mesSel] = inputMes.value.split('-');
+                return fechaItem.getFullYear() == anioSel && (fechaItem.getMonth() + 1) == parseInt(mesSel);
+            } else if (rango === 'anio_especifico') {
+                const inputAnio = document.getElementById(prefijo + '-input-anio');
+                if (!inputAnio || !inputAnio.value) return true;
+                return fechaItem.getFullYear() == parseInt(inputAnio.value);
+            } else if (rango === 'semana_especifica') {
+                const inputSemana = document.getElementById(prefijo + '-input-semana');
+                if (!inputSemana || !inputSemana.value) return true;
+                let fechaRef = new Date(inputSemana.value + 'T00:00:00');
+                let diaSem = fechaRef.getDay() || 7;
+                let inicioSemana = new Date(fechaRef);
+                inicioSemana.setDate(fechaRef.getDate() - diaSem + 1);
+                inicioSemana.setHours(0, 0, 0, 0);
+                let finSemana = new Date(inicioSemana);
+                finSemana.setDate(inicioSemana.getDate() + 6);
+                finSemana.setHours(23, 59, 59, 999);
+                return fechaItem >= inicioSemana && fechaItem <= finSemana;
+            } else if (rango === 'personalizado') {
+                const inputDesde = document.getElementById(prefijo + '-input-desde');
+                const inputHasta = document.getElementById(prefijo + '-input-hasta');
+                if (!inputDesde || !inputHasta || !inputDesde.value || !inputHasta.value) return true;
+                let fechaDesde = new Date(inputDesde.value + 'T00:00:00');
+                let fechaHasta = new Date(inputHasta.value + 'T23:59:59');
+                return fechaItem >= fechaDesde && fechaItem <= fechaHasta;
+            }
+            return true;
+        });
     }
 
     function filtrarClientesAutocomplete(texto) {
@@ -771,11 +978,20 @@
         let fecha = new Date(fechaEntregaStr);
         if (isNaN(fecha.getTime())) return fechaEntregaStr;
 
-        if (tiempoAlquiler.includes('hora')) {
-            let num = parseInt(tiempoAlquiler) || 6;
+        let tiempoStr = tiempoAlquiler.toLowerCase();
+        let num = parseInt(tiempoAlquiler) || 1;
+
+        if (tiempoStr.includes('hora')) {
             fecha.setHours(fecha.getHours() + num);
-        } else if (tiempoAlquiler.includes('día') || tiempoAlquiler.includes('dias')) {
-            let num = parseInt(tiempoAlquiler) || 1;
+        } else if (tiempoStr.includes('día') || tiempoStr.includes('dias')) {
+            fecha.setDate(fecha.getDate() + num);
+        } else if (tiempoStr.includes('semana')) {
+            fecha.setDate(fecha.getDate() + (num * 7));
+        } else if (tiempoStr.includes('mes')) {
+            fecha.setMonth(fecha.getMonth() + num);
+        } else if (tiempoStr.includes('año') || tiempoStr.includes('anio')) {
+            fecha.setFullYear(fecha.getFullYear() + num);
+        } else {
             fecha.setDate(fecha.getDate() + num);
         }
 
@@ -1088,7 +1304,7 @@
         const listaOpPedidos = document.getElementById('lista-operaciones-pedidos');
         const contadorServiciosOp = document.getElementById('contador-servicios-op');
         const rango = document.getElementById('op-rango') ? document.getElementById('op-rango').value : 'mes';
-        let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
+        let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango, 'op');
 
         pedidosFiltrados.sort((a, b) => {
             let fechaA = new Date(a.fechaEntrega || 0);
@@ -1154,43 +1370,10 @@
         }
     }
 
-    function filtrarPorRangoFecha(lista, campoFechaStr, rango) {
-        let ahora = new Date();
-        return lista.filter(item => {
-            let valFecha = item[campoFechaStr];
-            if (!valFecha) return false;
-            let fechaItem = new Date(valFecha);
-            if (isNaN(fechaItem.getTime())) return false;
-
-            if (rango === 'hoy') {
-                return fechaItem.toDateString() === ahora.toDateString();
-            } else if (rango === 'ayer') {
-                let ayer = new Date();
-                ayer.setDate(ahora.getDate() - 1);
-                return fechaItem.toDateString() === ayer.toDateString();
-            } else if (rango === 'esta semana') {
-                let primerDiaSemana = new Date(ahora);
-                let diaSem = ahora.getDay() || 7;
-                primerDiaSemana.setHours(0,0,0,0);
-                primerDiaSemana.setDate(ahora.getDate() - diaSem + 1);
-                return fechaItem >= primerDiaSemana && fechaItem <= ahora;
-            } else if (rango === 'mes') {
-                return fechaItem.getMonth() === ahora.getMonth() && fechaItem.getFullYear() === ahora.getFullYear();
-            } else if (rango === 'ultimos tres meses') {
-                let haceTresMeses = new Date();
-                haceTresMeses.setMonth(ahora.getMonth() - 3);
-                return fechaItem >= haceTresMeses && fechaItem <= ahora;
-            } else if (rango === 'anio') {
-                return fechaItem.getFullYear() === ahora.getFullYear();
-            }
-            return true;
-        });
-    }
-
     function actualizarFinanzas() {
         const rango = document.getElementById('fin-rango').value;
 
-        let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
+        let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango, 'fin');
         let dineroEntrado = 0;
         pedidosFiltrados.forEach(p => {
             if (p.estatus !== 'cancelado' && p.montoPagado) {
@@ -1201,18 +1384,20 @@
 
         let mantBase = parseFloat(document.getElementById('fin-mantenimiento-base').value) || 210000;
         let mantCalculado = mantBase;
-        if (rango === 'anio') {
+        if (rango === 'anio' || rango === 'anio_especifico') {
             mantCalculado = mantBase * 12;
         } else if (rango === 'ultimos tres meses') {
             mantCalculado = mantBase * 3;
-        } else if (rango === 'esta semana') {
+        } else if (rango === 'esta semana' || rango === 'semana_especifica') {
             mantCalculado = mantBase / 4;
-        } else if (rango === 'hoy' || rango === 'ayer') {
+        } else if (rango === 'hoy' || rango === 'ayer' || rango === 'dia_especifico') {
             mantCalculado = mantBase / 30;
+        } else if (rango === 'mes_especifico' || rango === 'personalizado') {
+            mantCalculado = mantBase;
         }
         document.getElementById('fin-mantenimiento-calculado').textContent = mantCalculado.toLocaleString();
         
-        let repuestosFiltrados = filtrarPorRangoFecha(dbGastosRepuestos, 'fecha', rango);
+        let repuestosFiltrados = filtrarPorRangoFecha(dbGastosRepuestos, 'fecha', rango, 'fin');
         let totalRepuestos = 0;
         let repuestosOperador = 0;
         let repuestosLavarapido = 0;
@@ -1259,7 +1444,7 @@
 
     function actualizarEstadisticas() {
         const rango = document.getElementById('est-rango').value;
-        let pedidosLapso = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
+        let pedidosLapso = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango, 'est');
 
         let statsLavadoras = {};
         dbLavadoras.forEach(l => {
@@ -1387,7 +1572,7 @@
         let clienteObj = dbClientes.find(c => c.id === clienteId);
         let nombreCliente = clienteObj ? clienteObj.nombre.trim().toLowerCase() : "";
 
-        let pedidosLapso = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
+        let pedidosLapso = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango, 'est');
         
         let pedidosCliente = pedidosLapso.filter(p => {
             let matchId = p.clienteId === clienteId;
@@ -1436,7 +1621,7 @@
         const contenedor = document.getElementById('resultado-stats-lavadora');
         if(!lavadoraNum) { contenedor.style.display = 'none'; return; }
 
-        let pedidosLapso = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango);
+        let pedidosLapso = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango, 'est');
         let pedidosLavadora = pedidosLapso.filter(p => p.lavadoraAsignada == lavadoraNum && (p.estatus === 'entregado' || p.estatus === 'completado'));
 
         let cantServicios = pedidosLavadora.length;
@@ -1446,16 +1631,14 @@
             if(p.montoPagado) dineroGenerado += parseFloat(p.montoPagado) || 0;
         });
 
-        let repuestosLapso = filtrarPorRangoFecha(dbGastosRepuestos, 'fecha', rango);
+        let repuestosLapso = filtrarPorRangoFecha(dbGastosRepuestos, 'fecha', rango, 'est');
         let repuestosLavadora = repuestosLapso.filter(r => r.lavadoraNum == lavadoraNum);
 
-        // También filtramos las incidencias de los pedidos asociados a esta lavadora en el lapso seleccionado
         let incidenciasLavadora = pedidosLapso.filter(p => p.lavadoraAsignada == lavadoraNum && p.estadoIncidencia === 'si hubo incidencia');
 
         let listaRepContenedor = document.getElementById('stat-lav-repuestos-list');
         listaRepContenedor.innerHTML = '';
 
-        // Mostrar repuestos con su fecha de adquisición
         repuestosLavadora.forEach(r => {
             let fechaRepFmt = formatearFechaDMY(r.fecha);
             let div = document.createElement('div');
@@ -1464,7 +1647,6 @@
             listaRepContenedor.appendChild(div);
         });
 
-        // Mostrar incidencias generadas con cliente y fecha
         incidenciasLavadora.forEach(inc => {
             let fechaIncFmt = formatearFechaDMY(inc.fechaRetiro || inc.fechaEntrega);
             let clienteInc = inc.clienteNombre || 'Cliente desconocido';
@@ -1641,6 +1823,7 @@
         const tiempoAlquiler = document.getElementById('ped-tiempo').value;
         const lavadoraNum = document.getElementById('ped-lavadora').value;
         
+        if(!tiempoAlquiler) { alert('Seleccione una duración de alquiler válida.'); return; }
         if(!lavadoraNum) { alert('Seleccione una lavadora disponible.'); return; }
 
         db.collection("pedidos").add({
@@ -1656,6 +1839,7 @@
             document.getElementById('form-agregar-pedido').reset();
             document.getElementById('busqueda-cliente-input').value = '';
             document.getElementById('cliente-seleccionado-badge').style.display = 'none';
+            document.getElementById('contenedor-subtiempo').innerHTML = '';
         });
     }
 
@@ -1694,7 +1878,7 @@
         document.getElementById('ent-pedido-id').value = pedidoId;
         document.getElementById('ent-lavadora').value = lavadora;
         document.getElementById('ent-fecha').value = fecha;
-        document.getElementById('ent-tiempo').value = tiempo;
+        document.getElementById('ent-tiempo').innerHTML = `<option value="${tiempo}" selected>${tiempo}</option>`;
         document.getElementById('ent-modalidad-pago').value = "";
         document.getElementById('contenedor-monto').style.display = "none";
         document.getElementById('modal-entregar').style.display = 'flex';
