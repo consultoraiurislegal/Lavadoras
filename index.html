@@ -3,74 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Gestión </title>
+    <title>LAVARÁPIDO | Portal de Gestión de Lujo</title>
     
     <!-- 1. SDKs de Firebase (App, Firestore y Analytics) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 
+    <!-- Google Fonts: Cinzel y Montserrat para un look sofisticado y lujoso -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <style>
-        :root { --primary: #1a237e; --secondary: #c62828; --accent: #2e7d32; --bg: #f0f2f5; --white: #ffffff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
+        :root { 
+            --bg-deep: #0a0a0a; 
+            --bg-card: #141414; 
+            --bg-element: #1e1e1e;
+            --border-gold: #d4af37;
+            --border-gold-light: #f3e5ab;
+            --text-main: #f5f5f5;
+            --text-muted: #aaaaaa;
+            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --gold-btn-gradient: linear-gradient(135deg, #d4af37, #aa771c);
+            --gold-btn-hover: linear-gradient(135deg, #e6c55d, #c58f23);
+            --accent-green: #2ecc71;
+            --accent-red: #e74c3c;
+        }
+
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: var(--bg-deep); 
+            margin: 0; 
+            padding: 0; 
+            color: var(--text-main); 
+        }
         
         header {
-            background: linear-gradient(135deg, #1a237e, #283593);
+            background: linear-gradient(180deg, #000000, #141414);
             color: white;
-            padding: 20px;
+            padding: 30px 20px;
             text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border-bottom: 2px solid var(--border-gold);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15);
         }
-        header h1 { margin: 0; font-size: 1.5em; letter-spacing: 1px; }
-        header p { font-size: 0.85em; margin: 5px 0 0 0; opacity: 0.8; }
+        header h1 { 
+            margin: 0; 
+            font-family: 'Cinzel', serif;
+            font-size: 2.2em; 
+            letter-spacing: 3px; 
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        header p { 
+            font-size: 0.9em; 
+            margin: 8px 0 0 0; 
+            color: var(--border-gold-light); 
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
 
-        .container { max-width: 900px; margin: 20px auto; padding: 15px; }
-        .card { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .container { max-width: 960px; margin: 30px auto; padding: 15px; }
         
-        /* Formularios y Botones */
-        .input-field { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        .btn-principal { background: var(--primary); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
-        .btn-principal:hover { background: #303f9f; }
-        .btn-secundario { background: var(--accent); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
-        .btn-secundario:hover { background: #1b5e20; }
-        .btn-peligro { background: var(--secondary); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85em; }
-        .btn-peligro:hover { background: #b71c1c; }
-        .btn-accion { background: var(--accent); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85em; margin-right: 5px; }
-        .btn-accion:hover { background: #1b5e20; }
+        .card { 
+            background: var(--bg-card); 
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px; 
+            padding: 25px; 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); 
+            margin-bottom: 25px; 
+        }
         
-        /* Menú de Pestañas */
-        .tab-menu { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
-        .tab-btn { background: #e0e0e0; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #555; flex-grow: 1; text-align: center; font-size: 0.9em; }
-        .tab-btn.active { background: var(--primary); color: white; }
+        /* Formularios y Botones Elegantes */
+        .input-field { 
+            width: 100%; 
+            padding: 14px; 
+            margin-bottom: 15px; 
+            background: var(--bg-element);
+            border: 1px solid rgba(212, 175, 55, 0.3); 
+            color: var(--text-main);
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 14px; 
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--border-gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
         
-        .tab-content { display: none; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #eee; }
+        .btn-principal { 
+            background: var(--gold-btn-gradient); 
+            color: #000; 
+            border: none; 
+            width: 100%; 
+            padding: 14px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease; 
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+        .btn-principal:hover { background: var(--gold-btn-hover); transform: translateY(-1px); }
+        
+        .btn-secundario { 
+            background: transparent; 
+            color: var(--border-gold); 
+            border: 1px solid var(--border-gold); 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+        }
+        .btn-secundario:hover { background: rgba(212, 175, 55, 0.15); color: #fff; }
+        
+        .btn-peligro { 
+            background: rgba(231, 76, 60, 0.15); 
+            color: var(--accent-red); 
+            border: 1px solid var(--accent-red); 
+            padding: 8px 14px; 
+            border-radius: 6px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 0.85em; 
+            transition: all 0.3s;
+        }
+        .btn-peligro:hover { background: var(--accent-red); color: white; }
+        
+        .btn-accion { 
+            background: rgba(46, 204, 113, 0.15); 
+            color: var(--accent-green); 
+            border: 1px solid var(--accent-green); 
+            padding: 8px 14px; 
+            border-radius: 6px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 0.85em; 
+            margin-right: 5px; 
+            transition: all 0.3s;
+        }
+        .btn-accion:hover { background: var(--accent-green); color: white; }
+        
+        /* Menú de Pestañas Estilo Lujo */
+        .tab-menu { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2); 
+            padding-bottom: 15px; 
+        }
+        .tab-btn { 
+            background: var(--bg-element); 
+            border: 1px solid rgba(212, 175, 55, 0.2); 
+            padding: 12px 18px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            color: var(--text-muted); 
+            flex-grow: 1; 
+            text-align: center; 
+            font-size: 0.85em; 
+            transition: all 0.3s ease;
+        }
+        .tab-btn:hover { border-color: var(--border-gold); color: var(--text-main); }
+        .tab-btn.active { 
+            background: var(--gold-btn-gradient); 
+            color: #000; 
+            border-color: transparent;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+        
+        .tab-content { display: none; padding: 20px; background: var(--bg-card); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.15); }
         .tab-content.active { display: block; }
         
-        .seccion-form { background: #ffffff; border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        .seccion-form h5 { margin-top: 0; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .flex-row { display: flex; gap: 10px; align-items: center; }
-        .btn-icon { background: var(--accent); color: white; border: none; width: 45px; height: 45px; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; flex-shrink: 0; }
-        .btn-icon:hover { background: #1b5e20; }
+        .seccion-form { background: var(--bg-element); border: 1px solid rgba(212, 175, 55, 0.2); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .seccion-form h5 { margin-top: 0; color: var(--border-gold); font-family: 'Cinzel', serif; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 8px; font-size: 1.1em; }
         
-        .alerta-ocupado { background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; font-size: 0.9em; margin-bottom: 12px; border: 1px solid #ffcdd2; }
+        .flex-row { display: flex; gap: 12px; align-items: center; }
+        .btn-icon { background: var(--gold-btn-gradient); color: #000; border: none; width: 45px; height: 45px; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(212,175,55,0.2); }
+        .btn-icon:hover { opacity: 0.9; }
+        
+        .alerta-ocupado { background: rgba(231, 76, 60, 0.1); color: var(--accent-red); padding: 12px; border-radius: 8px; font-size: 0.9em; margin-bottom: 12px; border: 1px solid rgba(231, 76, 60, 0.3); }
         
         /* Listas y Tarjetas de Pedidos */
-        .admin-list { max-height: 250px; overflow-y: auto; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px; font-size: 0.85em; margin-bottom: 10px; }
-        .admin-item { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
-        .pedido-card { background: #fff; border: 1px solid #ccd1d9; border-radius: 8px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-        .pedido-card p { margin: 4px 0; font-size: 0.9em; }
-        .acciones-pedido { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .admin-list { max-height: 280px; overflow-y: auto; background: var(--bg-deep); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; padding: 10px; font-size: 0.85em; margin-bottom: 10px; }
+        .admin-item { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
+        
+        .pedido-card { background: var(--bg-element); border: 1px solid rgba(212, 175, 55, 0.25); border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .pedido-card p { margin: 6px 0; font-size: 0.9em; color: var(--text-main); }
+        .acciones-pedido { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
 
-        /* Modal flotante personalizado */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        /* Modal flotante personalizado estilo oscuro/dorado */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--bg-card); border: 1px solid var(--border-gold); padding: 25px; border-radius: 14px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(212,175,55,0.25); color: var(--text-main); }
+        
+        /* Scrollbars elegantes */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-gold); }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>LAVARAPIDO</h1>
-    <p>Portal de Control Operativo</p>
+    <h1>LAVARÁPIDO</h1>
+    <p>Portal de Control Operativo Ejecutivo</p>
 </header>
 
 <div class="container">
@@ -88,7 +236,7 @@
 
         <!-- PESTAÑA 1: AGREGAR PEDIDO -->
         <div id="tab-agregar-pedido" class="tab-content active">
-            <h4 style="color: var(--primary); margin-top: 0;">📦 Registro de Nuevo Alquiler</h4>
+            <h4 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">📦 Registro de Nuevo Alquiler</h4>
             
             <form id="form-agregar-pedido" onsubmit="guardarPedido(event)">
                 <div class="seccion-form">
@@ -98,19 +246,19 @@
                             <input type="text" id="busqueda-cliente-input" class="input-field" placeholder="🔍 Escribe al menos 3 letras del nombre o teléfono..." autocomplete="off" style="margin-bottom: 0;" oninput="filtrarClientesAutocomplete(this.value)">
                             <input type="hidden" id="ped-cliente" required>
                             
-                            <div id="lista-sugerencias-clientes" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+                            <div id="lista-sugerencias-clientes" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card); border: 1px solid var(--border-gold); border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5);"></div>
                         </div>
                         <button type="button" class="btn-icon" title="Agregar nuevo cliente" onclick="toggleFormCliente()">➕</button>
                     </div>
-                    <div id="cliente-seleccionado-badge" style="margin-top: 8px; font-size: 0.85em; color: var(--accent); font-weight: bold; display: none;"></div>
+                    <div id="cliente-seleccionado-badge" style="margin-top: 8px; font-size: 0.85em; color: var(--accent-green); font-weight: bold; display: none;"></div>
 
-                    <div id="seccion-nuevo-cliente" style="display: none; background: #f1f8e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px dashed var(--accent);">
-                        <strong style="font-size: 0.85em; color: var(--accent);">Registrar Nuevo Cliente Rápido:</strong>
+                    <div id="seccion-nuevo-cliente" style="display: none; background: var(--bg-deep); padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px dashed var(--border-gold);">
+                        <strong style="font-size: 0.85em; color: var(--border-gold);">Registrar Nuevo Cliente Rápido:</strong>
                         <input type="text" id="cli-nombre-rapido" class="input-field" placeholder="Nombre completo" style="margin-top: 8px;">
                         <input type="text" id="cli-telefono-rapido" class="input-field" placeholder="Teléfono">
                         <input type="text" id="cli-direccion-rapido" class="input-field" placeholder="Dirección">
                         <input type="text" id="cli-referencia-rapido" class="input-field" placeholder="Punto de referencia">
-                        <button type="button" class="btn-secundario" style="padding: 8px;" onclick="guardarClienteRapido()">Guardar y Seleccionar</button>
+                        <button type="button" class="btn-secundario" style="padding: 10px;" onclick="guardarClienteRapido()">Guardar y Seleccionar</button>
                     </div>
                 </div>
 
@@ -146,8 +294,8 @@
                         ⚠️ <strong>No hay lavadoras disponibles en este momento (todas están comprometidas o alquiladas).</strong>
                     </div>
                     <div id="sin-lavadoras-inventario" style="display: none; text-align: center; padding: 10px;">
-                        <p style="font-size: 0.9em; color: var(--secondary); margin-bottom: 5px;">No hay lavadoras registradas en el sistema.</p>
-                        <button type="button" class="btn-icon" style="margin: 0 auto; background: var(--secondary);" onclick="irAAdmin()">➕</button>
+                        <p style="font-size: 0.9em; color: var(--accent-red); margin-bottom: 5px;">No hay lavadoras registradas en el sistema.</p>
+                        <button type="button" class="btn-icon" style="margin: 0 auto;" onclick="irAAdmin()">➕</button>
                     </div>
                 </div>
 
@@ -157,23 +305,23 @@
 
         <!-- PESTAÑA 2: LAVADORAS POR ENTREGAR -->
         <div id="tab-por-entregar" class="tab-content">
-            <h4 style="color: var(--primary); margin-top: 0;">🚚 Lavadoras por Entregar / Pedidos Pendientes</h4>
+            <h4 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">🚚 Lavadoras por Entregar / Pedidos Pendientes</h4>
             <div id="lista-pedidos-por-entregar">
-                <p style="color: #777; font-size: 0.9em;">Cargando pedidos pendientes...</p>
+                <p style="color: var(--text-muted); font-size: 0.9em;">Cargando pedidos pendientes...</p>
             </div>
         </div>
 
         <!-- PESTAÑA 3: LAVADORAS POR BUSCAR -->
         <div id="tab-por-buscar" class="tab-content">
-            <h4 style="color: var(--primary); margin-top: 0;">🔍 Lavadoras Alquiladas (Por Buscar)</h4>
+            <h4 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">🔍 Lavadoras Alquiladas (Por Buscar)</h4>
             <div id="lista-pedidos-por-buscar">
-                <p style="color: #777; font-size: 0.9em;">Cargando lavadoras alquiladas...</p>
+                <p style="color: var(--text-muted); font-size: 0.9em;">Cargando lavadoras alquiladas...</p>
             </div>
         </div>
 
         <!-- PESTAÑA 4: FINANZAS -->
         <div id="tab-finanzas" class="tab-content">
-            <h4 style="color: var(--primary); margin-top: 0;">💰 Control Financiero</h4>
+            <h4 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">💰 Control Financiero</h4>
             
             <div class="seccion-form">
                 <h5>📅 Rango de Tiempo</h5>
@@ -195,33 +343,33 @@
 
             <div class="seccion-form">
                 <h5>1) Dinero que ha entrado</h5>
-                <p style="font-size: 1.2em; font-weight: bold; color: var(--accent);" id="fin-dinero-entrado">$0.00</p>
+                <p style="font-size: 1.3em; font-weight: bold; color: var(--accent-green);" id="fin-dinero-entrado">$0.00</p>
             </div>
 
             <div class="seccion-form">
                 <h5>2) Mantenimiento de vehículo</h5>
-                <label style="font-size: 0.85em; font-weight: bold;">Monto base de mantenimiento (pesos):</label>
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Monto base de mantenimiento (pesos):</label>
                 <input type="number" id="fin-mantenimiento-base" class="input-field" value="210000" oninput="actualizarFinanzas()">
-                <p style="font-size: 0.9em; color: #555; margin-top: 5px;">Monto ajustado al lapso seleccionado: <b id="fin-mantenimiento-calculado">0</b> pesos</p>
+                <p style="font-size: 0.9em; color: var(--text-muted); margin-top: 5px;">Monto ajustado al lapso seleccionado: <b id="fin-mantenimiento-calculado" style="color: var(--border-gold);">0</b> pesos</p>
             </div>
 
             <div class="seccion-form">
                 <h5>3) Repuestos</h5>
                 <form id="form-gasto-repuesto" onsubmit="registrarGastoRepuesto(event)">
-                    <label style="font-size: 0.85em; font-weight: bold;">Seleccionar Repuesto:</label>
+                    <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Seleccionar Repuesto:</label>
                     <select id="rep-seleccionado" class="input-field" required>
                         <option value="" disabled selected>-- Seleccione repuesto --</option>
                     </select>
 
-                    <label style="font-size: 0.85em; font-weight: bold;">Costo del Repuesto ($ / Pesos):</label>
+                    <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Costo del Repuesto ($ / Pesos):</label>
                     <input type="number" step="0.01" id="rep-costo" class="input-field" placeholder="Ej: 15" required>
 
-                    <label style="font-size: 0.85em; font-weight: bold;">Número de Lavadora:</label>
+                    <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Número de Lavadora:</label>
                     <select id="rep-lavadora-num" class="input-field" required>
                         <option value="" disabled selected>-- Seleccione lavadora --</option>
                     </select>
 
-                    <label style="font-size: 0.85em; font-weight: bold;">¿Quién lo pagó?:</label>
+                    <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">¿Quién lo pagó?:</label>
                     <select id="rep-pagado-por" class="input-field" required>
                         <option value="lavarapido">Lavarapido</option>
                         <option value="operador">Operador</option>
@@ -231,30 +379,30 @@
                 </form>
 
                 <div style="margin-top: 15px;">
-                    <strong style="font-size: 0.85em; color: #555;">Repuestos comprados en el lapso seleccionado:</strong>
+                    <strong style="font-size: 0.85em; color: var(--text-muted);">Repuestos comprados en el lapso seleccionado:</strong>
                     <div id="lista-repuestos-finanzas" class="admin-list" style="margin-top: 5px;"></div>
-                    <p style="font-size: 0.9em; margin-top: 8px;"><b>Total de gastos por repuestos:</b> <span id="fin-total-repuestos">0</span></p>
+                    <p style="font-size: 0.9em; margin-top: 8px;"><b>Total de gastos por repuestos:</b> <span id="fin-total-repuestos" style="color: var(--accent-red);">0</span></p>
                 </div>
             </div>
 
-            <div class="seccion-form" style="background: #e8eaf6; border-color: #c5cae9;">
-                <h5 style="color: var(--primary);">⚖️ Distribución para el Operador y para la Lavarápido</h5>
-                <p style="font-size: 0.9em; margin-bottom: 5px;"><b>Base de cálculo (Dinero entrado - Mantenimiento - Rep. Operador - Rep. Lavarápido):</b> <span id="dist-restante" style="font-weight: bold;">0</span></p>
+            <div class="seccion-form" style="background: #111; border-color: var(--border-gold);">
+                <h5 style="color: var(--border-gold);">⚖️ Distribución para el Operador y para la Lavarápido</h5>
+                <p style="font-size: 0.9em; margin-bottom: 5px;"><b>Base de cálculo (Dinero entrado - Mantenimiento - Rep. Operador - Rep. Lavarápido):</b> <span id="dist-restante" style="font-weight: bold; color: var(--border-gold);">0</span></p>
                 <p style="font-size: 0.9em; margin-bottom: 12px;"><b>Mitad de la base ((Base) / 2):</b> <span id="dist-mitad" style="font-weight: bold;">0</span></p>
                 
-                <hr style="border: 0; border-top: 1px solid #c5cae9; margin: 10px 0;">
+                <hr style="border: 0; border-top: 1px solid rgba(212,175,55,0.2); margin: 10px 0;">
                 
                 <div style="margin-bottom: 12px;">
-                    <p style="font-size: 0.95em; font-weight: bold; color: var(--primary); margin: 0 0 4px 0;">1. Total para el Operador:</p>
-                    <p style="font-size: 0.85em; color: #555; margin: 0; line-height: 1.4;">
-                        Desglose: (<span id="desc-op-base">0</span> / 2) + Mantenimiento (<span id="desc-op-mant">0</span>) + Repuestos Operador (<span id="desc-op-repop">0</span>) = <b id="dist-operador" style="color: var(--primary); font-size: 1.1em;">0</b>
+                    <p style="font-size: 0.95em; font-weight: bold; color: var(--border-gold); margin: 0 0 4px 0;">1. Total para el Operador:</p>
+                    <p style="font-size: 0.85em; color: var(--text-muted); margin: 0; line-height: 1.4;">
+                        Desglose: (<span id="desc-op-base">0</span> / 2) + Mantenimiento (<span id="desc-op-mant">0</span>) + Repuestos Operador (<span id="desc-op-repop">0</span>) = <b id="dist-operador" style="color: var(--border-gold); font-size: 1.1em;">0</b>
                     </p>
                 </div>
 
                 <div>
-                    <p style="font-size: 0.95em; font-weight: bold; color: var(--accent); margin: 0 0 4px 0;">2. Total para Lavarápido:</p>
-                    <p style="font-size: 0.85em; color: #555; margin: 0; line-height: 1.4;">
-                        Desglose: (<span id="desc-lav-base">0</span> / 2) + Repuestos Lavarápido (<span id="desc-lav-replav">0</span>) = <b id="dist-lavarapido" style="color: var(--accent); font-size: 1.1em;">0</b>
+                    <p style="font-size: 0.95em; font-weight: bold; color: var(--accent-green); margin: 0 0 4px 0;">2. Total para Lavarápido:</p>
+                    <p style="font-size: 0.85em; color: var(--text-muted); margin: 0; line-height: 1.4;">
+                        Desglose: (<span id="desc-lav-base">0</span> / 2) + Repuestos Lavarápido (<span id="desc-lav-replav">0</span>) = <b id="dist-lavarapido" style="color: var(--accent-green); font-size: 1.1em;">0</b>
                     </p>
                 </div>
             </div>
@@ -262,7 +410,7 @@
 
         <!-- PESTAÑA 5: ESTADÍSTICAS -->
         <div id="tab-estadisticas" class="tab-content">
-            <h4 style="color: var(--primary); margin-top: 0;">📊 Panel de Estadísticas</h4>
+            <h4 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">📊 Panel de Estadísticas</h4>
             
             <div class="seccion-form">
                 <h5>📅 Lapso de Tiempo</h5>
@@ -283,33 +431,33 @@
             </div>
 
             <div class="seccion-form">
-                <h5 style="color: var(--primary);">🏆 Ranking de Todas las Lavadoras por Cantidad de Servicios</h5>
+                <h5 style="color: var(--border-gold);">🏆 Ranking de Todas las Lavadoras por Cantidad de Servicios</h5>
                 <div id="ranking-todas-lavadoras" class="admin-list" style="max-height: 200px;"></div>
             </div>
 
             <div class="seccion-form">
-                <h5 style="color: var(--secondary);">❌ Lavadoras Canceladas por Motivo (en el lapso)</h5>
+                <h5 style="color: var(--accent-red);">❌ Lavadoras Canceladas por Motivo (en el lapso)</h5>
                 <div id="lista-stats-cancelaciones" class="admin-list" style="max-height: 150px;"></div>
             </div>
 
             <div class="flex-row" style="gap: 15px; align-items: stretch; flex-wrap: wrap;">
                 <div class="seccion-form" style="flex: 1; min-width: 280px;">
-                    <h5 style="color: var(--primary);">🏆 Top 3: Aportadores de Dinero</h5>
+                    <h5 style="color: var(--border-gold);">🏆 Top 3: Aportadores de Dinero</h5>
                     <div id="top-clientes-dinero" class="admin-list" style="max-height: 150px;"></div>
                 </div>
                 <div class="seccion-form" style="flex: 1; min-width: 280px;">
-                    <h5 style="color: var(--secondary);">⚠️ Top 3: Clientes con Más Incidencias</h5>
+                    <h5 style="color: var(--accent-red);">⚠️ Top 3: Clientes con Más Incidencias</h5>
                     <div id="top-clientes-incidencias" class="admin-list" style="max-height: 150px;"></div>
                 </div>
             </div>
 
             <div class="seccion-form">
                 <h5>👤 Estadísticas Detalladas por Cliente</h5>
-                <label style="font-size: 0.85em; font-weight: bold;">Seleccionar Cliente:</label>
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Seleccionar Cliente:</label>
                 <select id="est-cliente-select" class="input-field" onchange="calcularEstadisticasCliente()">
                     <option value="" disabled selected>-- Seleccione un cliente --</option>
                 </select>
-                <div id="resultado-stats-cliente" style="background: #f1f8e9; padding: 12px; border-radius: 8px; margin-top: 10px; display: none; font-size: 0.9em;">
+                <div id="resultado-stats-cliente" style="background: var(--bg-deep); border: 1px solid rgba(212,175,55,0.2); padding: 12px; border-radius: 8px; margin-top: 10px; display: none; font-size: 0.9em;">
                     <p><b>Cantidad de servicios contratados:</b> <span id="stat-cli-servicios">0</span></p>
                     <p><b>Cantidad de incidencias al buscar la lavadora:</b> <span id="stat-cli-incidencias">0</span></p>
                     <p><b>Cantidad de dinero aportado a Lavarapido:</b> $<span id="stat-cli-dinero">0.00</span></p>
@@ -319,22 +467,22 @@
 
             <div class="seccion-form">
                 <h5>🧺 Estadísticas Detalladas por Lavadora</h5>
-                <label style="font-size: 0.85em; font-weight: bold;">Seleccionar Lavadora:</label>
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Seleccionar Lavadora:</label>
                 <select id="est-lavadora-select" class="input-field" onchange="calcularEstadisticasLavadora()">
                     <option value="" disabled selected>-- Seleccione una lavadora --</option>
                 </select>
-                <div id="resultado-stats-lavadora" style="background: #e8eaf6; padding: 12px; border-radius: 8px; margin-top: 10px; display: none; font-size: 0.9em;">
+                <div id="resultado-stats-lavadora" style="background: var(--bg-deep); border: 1px solid rgba(212,175,55,0.2); padding: 12px; border-radius: 8px; margin-top: 10px; display: none; font-size: 0.9em;">
                     <p><b>Cantidad de servicios realizados:</b> <span id="stat-lav-servicios">0</span></p>
                     <p><b>Cantidad de dinero generado:</b> $<span id="stat-lav-dinero">0.00</span></p>
                     <p style="margin-top: 8px;"><b>Listado de repuestos (con fecha de adquisición) e incidencias generadas:</b></p>
-                    <div id="stat-lav-repuestos-list" class="admin-list" style="max-height: 150px; background: white; margin-top: 5px;"></div>
+                    <div id="stat-lav-repuestos-list" class="admin-list" style="max-height: 150px; background: var(--bg-card); margin-top: 5px;"></div>
                 </div>
             </div>
         </div>
 
         <!-- PESTAÑA 6: PANEL DE ADMINISTRACIÓN -->
         <div id="tab-admin" class="tab-content">
-            <h4 style="color: var(--primary); margin-top: 0;">🛠️ Panel de Administración</h4>
+            <h4 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">🛠️ Panel de Administración</h4>
             
             <div class="seccion-form">
                 <h5 id="titulo-form-cliente">👥 Registrar Nuevo Cliente</h5>
@@ -350,7 +498,7 @@
                     </div>
                 </form>
                 <div style="margin-top: 15px;">
-                    <strong style="font-size: 0.85em; color: #555;">Clientes Registrados:</strong>
+                    <strong style="font-size: 0.85em; color: var(--text-muted);">Clientes Registrados:</strong>
                     <div id="lista-clientes-admin" class="admin-list"></div>
                 </div>
             </div>
@@ -364,7 +512,7 @@
                     </div>
                 </form>
                 <div style="margin-top: 15px;">
-                    <strong style="font-size: 0.85em; color: #555;">Inventario y Estatus de Lavadoras:</strong>
+                    <strong style="font-size: 0.85em; color: var(--text-muted);">Inventario y Estatus de Lavadoras:</strong>
                     <div id="lista-lavadoras-admin" class="admin-list"></div>
                 </div>
             </div>
@@ -378,7 +526,7 @@
                     </div>
                 </form>
                 <div style="margin-top: 15px;">
-                    <strong style="font-size: 0.85em; color: #555;">Repuestos Registrados:</strong>
+                    <strong style="font-size: 0.85em; color: var(--text-muted);">Repuestos Registrados:</strong>
                     <div id="lista-repuestos-admin" class="admin-list"></div>
                 </div>
             </div>
@@ -392,7 +540,7 @@
                     </div>
                 </form>
                 <div style="margin-top: 15px;">
-                    <strong style="font-size: 0.85em; color: #555;">Motivos Registrados:</strong>
+                    <strong style="font-size: 0.85em; color: var(--text-muted);">Motivos Registrados:</strong>
                     <div id="lista-motivos-admin" class="admin-list"></div>
                 </div>
             </div>
@@ -400,8 +548,8 @@
 
         <!-- PESTAÑA 7: REGISTRO DE OPERACIONES -->
         <div id="tab-operaciones" class="tab-content">
-            <h4 style="color: var(--primary); margin-top: 0;">📋 Registro General de Operaciones y Pagos</h4>
-            <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">Aquí puedes visualizar, editar el monto pagado, modificar o eliminar cualquier operación de cobro registrada en el sistema.</p>
+            <h4 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">📋 Registro General de Operaciones y Pagos</h4>
+            <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 15px;">Aquí puedes visualizar, editar el monto pagado, modificar o eliminar cualquier operación de cobro registrada en el sistema.</p>
             
             <div class="seccion-form">
                 <h5>📅 Lapso de Tiempo</h5>
@@ -424,12 +572,12 @@
             <div class="seccion-form">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h5 style="margin: 0;">💰 Historial de Cobros por Servicios (Pedidos)</h5>
-                    <span style="font-size: 0.9em; background: #e8eaf6; color: var(--primary); padding: 4px 10px; border-radius: 6px; font-weight: bold;">
+                    <span style="font-size: 0.9em; background: var(--bg-deep); color: var(--border-gold); border: 1px solid var(--border-gold); padding: 4px 10px; border-radius: 6px; font-weight: bold;">
                         Total de Servicios: <span id="contador-servicios-op">0</span>
                     </span>
                 </div>
                 <div id="lista-operaciones-pedidos" class="admin-list" style="max-height: 350px;">
-                    <p style="color: #777; font-size: 0.9em;">Cargando operaciones de cobro...</p>
+                    <p style="color: var(--text-muted); font-size: 0.9em;">Cargando operaciones de cobro...</p>
                 </div>
             </div>
         </div>
@@ -439,14 +587,14 @@
 <!-- MODAL PARA CANCELAR PEDIDO -->
 <div id="modal-cancelar" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="color: var(--secondary); margin-top: 0;">❌ Cancelar Pedido</h3>
-        <p style="font-size: 0.9em;">Seleccione el motivo de la cancelación:</p>
+        <h3 style="color: var(--accent-red); margin-top: 0; font-family: 'Cinzel', serif;">❌ Cancelar Pedido</h3>
+        <p style="font-size: 0.9em; color: var(--text-muted);">Seleccione el motivo de la cancelación:</p>
         <select id="select-motivo-cancelacion" class="input-field">
             <option value="" disabled selected>-- Seleccione motivo --</option>
         </select>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button type="button" class="btn-peligro" style="flex:1;" onclick="confirmarCancelacionPedido()">Confirmar Cancelación</button>
-            <button type="button" class="btn-secundario" style="flex:1; background: #6c757d;" onclick="cerrarModal('modal-cancelar')">Cerrar</button>
+            <button type="button" class="btn-secundario" style="flex:1;" onclick="cerrarModal('modal-cancelar')">Cerrar</button>
         </div>
     </div>
 </div>
@@ -454,17 +602,17 @@
 <!-- MODAL PARA CONFIRMAR ENTREGA -->
 <div id="modal-entregar" class="modal-overlay">
     <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
-        <h3 style="color: var(--primary); margin-top: 0;">🚚 Confirmar Términos de Entrega</h3>
+        <h3 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">🚚 Confirmar Términos de Entrega</h3>
         <form id="form-confirmar-entrega" onsubmit="procesarEntregaFinal(event)">
             <input type="hidden" id="ent-pedido-id">
             
-            <label style="font-size: 0.85em; font-weight: bold;">Número de Lavadora:</label>
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Número de Lavadora:</label>
             <input type="text" id="ent-lavadora" class="input-field" required>
 
-            <label style="font-size: 0.85em; font-weight: bold;">Fecha y Hora de Entrega:</label>
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Fecha y Hora de Entrega:</label>
             <input type="datetime-local" id="ent-fecha" class="input-field" required>
 
-            <label style="font-size: 0.85em; font-weight: bold;">Tiempo de Servicio:</label>
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Tiempo de Servicio:</label>
             <select id="ent-tiempo" class="input-field" required>
                 <option value="6 horas">6 horas</option>
                 <option value="12 horas">12 horas</option>
@@ -473,7 +621,7 @@
                 <option value="3 días">3 días</option>
             </select>
 
-            <label style="font-size: 0.85em; font-weight: bold;">Modalidad de Pago:</label>
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Modalidad de Pago:</label>
             <select id="ent-modalidad-pago" class="input-field" onchange="toggleCampoMonto()" required>
                 <option value="" disabled selected>-- Seleccione opción --</option>
                 <option value="pago">Pago (Ya pagó)</option>
@@ -481,13 +629,13 @@
             </select>
 
             <div id="contenedor-monto" style="display: none;">
-                <label style="font-size: 0.85em; font-weight: bold;">Monto Pagado ($):</label>
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Monto Pagado ($):</label>
                 <input type="number" step="0.01" id="ent-monto" class="input-field" placeholder="Ingrese el monto">
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button type="submit" class="btn-secundario" style="flex:1;">✅ Guardar y Marcar como Alquilada</button>
-                <button type="button" class="btn-secundario" style="flex:1; background: #6c757d;" onclick="cerrarModal('modal-entregar')">Cancelar</button>
+                <button type="submit" class="btn-secundario" style="flex:1; background: var(--gold-btn-gradient); color: #000; border: none;">✅ Guardar y Marcar como Alquilada</button>
+                <button type="button" class="btn-secundario" style="flex:1;" onclick="cerrarModal('modal-entregar')">Cancelar</button>
             </div>
         </form>
     </div>
@@ -496,15 +644,15 @@
 <!-- MODAL PARA RETIRAR / BUSCAR LAVADORA -->
 <div id="modal-retirar" class="modal-overlay">
     <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
-        <h3 style="color: var(--primary); margin-top: 0;">🔍 Registrar Retiro de Lavadora</h3>
+        <h3 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">🔍 Registrar Retiro de Lavadora</h3>
         <form id="form-retirar-lavadora" onsubmit="procesarRetiroFinal(event)">
             <input type="hidden" id="ret-pedido-id">
             <input type="hidden" id="ret-lavadora-num">
 
-            <label style="font-size: 0.85em; font-weight: bold;">Fecha y Hora del Retiro:</label>
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Fecha y Hora del Retiro:</label>
             <input type="datetime-local" id="ret-fecha-hora" class="input-field" required>
 
-            <label style="font-size: 0.85em; font-weight: bold;">¿Hubo alguna incidencia con el servicio?</label>
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">¿Hubo alguna incidencia con el servicio?</label>
             <select id="ret-estado-incidencia" class="input-field" onchange="toggleCampoIncidencia()" required>
                 <option value="" disabled selected>-- Seleccione opción --</option>
                 <option value="no hubo incidencia">No hubo incidencia</option>
@@ -512,13 +660,13 @@
             </select>
 
             <div id="contenedor-descripcion-incidencia" style="display: none;">
-                <label style="font-size: 0.85em; font-weight: bold;">Descripción de la Incidencia:</label>
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Descripción de la Incidencia:</label>
                 <textarea id="ret-desc-incidencia" class="input-field" placeholder="Describa el problema presentado..." rows="3"></textarea>
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button type="submit" class="btn-secundario" style="flex:1;">🏁 Confirmar Retiro (Disponible)</button>
-                <button type="button" class="btn-secundario" style="flex:1; background: #6c757d;" onclick="cerrarModal('modal-retirar')">Cancelar</button>
+                <button type="submit" class="btn-secundario" style="flex:1; background: var(--gold-btn-gradient); color: #000; border: none;">🏁 Confirmar Retiro (Disponible)</button>
+                <button type="button" class="btn-secundario" style="flex:1;" onclick="cerrarModal('modal-retirar')">Cancelar</button>
             </div>
         </form>
     </div>
@@ -527,12 +675,12 @@
 <!-- MODAL PARA CAMBIAR ESTATUS MANUAL DE LAVADORA -->
 <div id="modal-estatus-lavadora" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="color: var(--primary); margin-top: 0;">⚙️ Cambiar Estatus de Lavadora</h3>
-        <p id="label-lavadora-cambio" style="font-size: 0.9em; font-weight: bold;"></p>
+        <h3 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">⚙️ Cambiar Estatus de Lavadora</h3>
+        <p id="label-lavadora-cambio" style="font-size: 0.9em; font-weight: bold; color: var(--text-main);"></p>
         <input type="hidden" id="est-lavadora-id">
         <input type="hidden" id="est-lavadora-numero">
 
-        <label style="font-size: 0.85em; font-weight: bold;">Nuevo Estatus:</label>
+        <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Nuevo Estatus:</label>
         <select id="select-nuevo-estatus" class="input-field" required>
             <option value="disponible">Disponible</option>
             <option value="comprometida">Comprometida</option>
@@ -542,8 +690,8 @@
         </select>
 
         <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="button" class="btn-secundario" style="flex:1;" onclick="guardarEstatusManualLavadora()">Actualizar Estatus</button>
-            <button type="button" class="btn-secundario" style="flex:1; background: #6c757d;" onclick="cerrarModal('modal-estatus-lavadora')">Cancelar</button>
+            <button type="button" class="btn-secundario" style="flex:1; background: var(--gold-btn-gradient); color: #000; border: none;" onclick="guardarEstatusManualLavadora()">Actualizar Estatus</button>
+            <button type="button" class="btn-secundario" style="flex:1;" onclick="cerrarModal('modal-estatus-lavadora')">Cancelar</button>
         </div>
     </div>
 </div>
@@ -551,17 +699,17 @@
 <!-- MODAL PARA EDITAR OPERACIÓN / MONTO DE PEDIDO -->
 <div id="modal-editar-pedido" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="color: var(--primary); margin-top: 0;">✏️ Modificar Operación de Pedido</h3>
+        <h3 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">✏️ Modificar Operación de Pedido</h3>
         <form id="form-editar-pedido-op" onsubmit="guardarEdicionPedidoOp(event)">
             <input type="hidden" id="edit-op-pedido-id">
             
-            <label style="font-size: 0.85em; font-weight: bold;">Cliente:</label>
-            <input type="text" id="edit-op-cliente" class="input-field" readonly style="background: #e9ecef;">
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Cliente:</label>
+            <input type="text" id="edit-op-cliente" class="input-field" readonly style="background: var(--bg-deep); color: var(--text-muted);">
 
-            <label style="font-size: 0.85em; font-weight: bold;">Monto Pagado ($):</label>
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Monto Pagado ($):</label>
             <input type="number" step="0.01" id="edit-op-monto" class="input-field" required>
 
-            <label style="font-size: 0.85em; font-weight: bold;">Estatus del Servicio:</label>
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Estatus del Servicio:</label>
             <select id="edit-op-estatus" class="input-field" required>
                 <option value="pendiente">Pendiente</option>
                 <option value="entregado">Entregado (Alquilada)</option>
@@ -570,8 +718,8 @@
             </select>
 
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button type="submit" class="btn-secundario" style="flex:1;">💾 Guardar Cambios</button>
-                <button type="button" class="btn-secundario" style="flex:1; background: #6c757d;" onclick="cerrarModal('modal-editar-pedido')">Cancelar</button>
+                <button type="submit" class="btn-secundario" style="flex:1; background: var(--gold-btn-gradient); color: #000; border: none;">💾 Guardar Cambios</button>
+                <button type="button" class="btn-secundario" style="flex:1;" onclick="cerrarModal('modal-editar-pedido')">Cancelar</button>
             </div>
         </form>
     </div>
@@ -788,36 +936,36 @@
 
         if (valor === 'dia_especifico') {
             contenedorExtra.innerHTML = `
-                <label style="font-size: 0.85em; font-weight: bold;">Seleccionar Día:</label>
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Seleccionar Día:</label>
                 <input type="date" id="${prefijo}-input-dia" class="input-field" value="${hoyStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
             `;
         } else if (valor === 'mes_especifico') {
             const anioActual = new Date().getFullYear();
             const mesActualStr = String(new Date().getMonth() + 1).padStart(2, '0');
             contenedorExtra.innerHTML = `
-                <label style="font-size: 0.85em; font-weight: bold;">Seleccionar Mes y Año:</label>
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Seleccionar Mes y Año:</label>
                 <input type="month" id="${prefijo}-input-mes" class="input-field" value="${anioActual}-${mesActualStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
             `;
         } else if (valor === 'anio_especifico') {
             const anioActual = new Date().getFullYear();
             contenedorExtra.innerHTML = `
-                <label style="font-size: 0.85em; font-weight: bold;">Seleccionar Año:</label>
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Seleccionar Año:</label>
                 <input type="number" id="${prefijo}-input-anio" class="input-field" value="${anioActual}" min="2020" max="2100" onchange="ejecutarActualizacionTab('${prefijo}')">
             `;
         } else if (valor === 'semana_especifica') {
             contenedorExtra.innerHTML = `
-                <label style="font-size: 0.85em; font-weight: bold;">Seleccione una fecha dentro de la semana:</label>
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Seleccione una fecha dentro de la semana:</label>
                 <input type="date" id="${prefijo}-input-semana" class="input-field" value="${hoyStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
             `;
         } else if (valor === 'personalizado') {
             contenedorExtra.innerHTML = `
                 <div style="display: flex; gap: 10px;">
                     <div style="flex: 1;">
-                        <label style="font-size: 0.85em; font-weight: bold;">Desde:</label>
+                        <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Desde:</label>
                         <input type="date" id="${prefijo}-input-desde" class="input-field" value="${hoyStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
                     </div>
                     <div style="flex: 1;">
-                        <label style="font-size: 0.85em; font-weight: bold;">Hasta:</label>
+                        <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Hasta:</label>
                         <input type="date" id="${prefijo}-input-hasta" class="input-field" value="${hoyStr}" onchange="ejecutarActualizacionTab('${prefijo}')">
                     </div>
                 </div>
@@ -921,7 +1069,7 @@
         contenedorSugerencias.innerHTML = '';
 
         if (resultados.length === 0) {
-            contenedorSugerencias.innerHTML = '<div style="padding: 10px; color: #777; font-size: 0.85em;">No se encontraron clientes (mínimo 3 letras)</div>';
+            contenedorSugerencias.innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 0.85em;">No se encontraron clientes (mínimo 3 letras)</div>';
             contenedorSugerencias.style.display = 'block';
             return;
         }
@@ -930,12 +1078,13 @@
             let div = document.createElement('div');
             div.style.padding = '10px';
             div.style.cursor = 'pointer';
-            div.style.borderBottom = '1px solid #eee';
+            div.style.borderBottom = '1px solid rgba(212,175,55,0.1)';
             div.style.fontSize = '0.9em';
-            div.innerHTML = `<b>${cli.nombre}</b> <span style="color: #666;">(Dir: ${cli.direccion || 'Sin dirección'})</span>`;
+            div.style.color = 'var(--text-main)';
+            div.innerHTML = `<b>${cli.nombre}</b> <span style="color: var(--text-muted);">(Dir: ${cli.direccion || 'Sin dirección'})</span>`;
             div.onclick = () => seleccionarClienteAutocomplete(cli.id, cli.nombre, cli.direccion);
-            div.onmouseover = () => div.style.background = '#f8f9fa';
-            div.onmouseout = () => div.style.background = 'white';
+            div.onmouseover = () => div.style.background = '#1e1e1e';
+            div.onmouseout = () => div.style.background = 'transparent';
             contenedorSugerencias.appendChild(div);
         });
 
@@ -1197,16 +1346,16 @@
             listLav.innerHTML = '';
             dbLavadoras.forEach(l => {
                 let estatusActual = obtenerEstatusLavadora(l);
-                let estiloColor = 'color: var(--accent);';
-                if (estatusActual === 'comprometida') estiloColor = 'color: #e65100;';
-                if (estatusActual === 'alquilada') estiloColor = 'color: var(--primary);';
-                if (estatusActual === 'dañada' || estatusActual === 'desincorporada') estiloColor = 'color: var(--secondary);';
+                let estiloColor = 'color: var(--accent-green);';
+                if (estatusActual === 'comprometida') estiloColor = 'color: #f39c12;';
+                if (estatusActual === 'alquilada') estiloColor = 'color: var(--border-gold);';
+                if (estatusActual === 'dañada' || estatusActual === 'desincorporada') estiloColor = 'color: var(--accent-red);';
 
                 let div = document.createElement('div');
                 div.className = 'admin-item';
                 div.innerHTML = `
                     <span><b>Lavadora N° ${l.numero}</b> <span style="${estiloColor} font-weight:bold; margin-left:10px;">[${estatusActual.toUpperCase()}]</span></span>
-                    <button class="btn-accion" style="padding: 4px 8px; font-size:0.75em; background:var(--primary);" onclick="abrirModalEstatusLavadora('${l.id}', '${l.numero}', '${estatusActual}')">⚙️ Cambiar Estatus</button>
+                    <button class="btn-accion" style="padding: 4px 8px; font-size:0.75em; background:transparent; border:1px solid var(--border-gold); color:var(--border-gold);" onclick="abrirModalEstatusLavadora('${l.id}', '${l.numero}', '${estatusActual}')">⚙️ Cambiar Estatus</button>
                 `;
                 listLav.appendChild(div);
             });
@@ -1241,7 +1390,7 @@
         const pendientes = dbPedidos.filter(p => p.estatus === 'pendiente');
 
         if (pendientes.length === 0) {
-            contenedorEntregar.innerHTML = '<p style="color: #777; font-size: 0.9em;">No hay lavadoras por entregar actualmente.</p>';
+            contenedorEntregar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9em;">No hay lavadoras por entregar actualmente.</p>';
         } else {
             pendientes.forEach(p => {
                 let clienteInfo = dbClientes.find(c => c.id === p.clienteId) || {};
@@ -1271,7 +1420,7 @@
         const entregados = dbPedidos.filter(p => p.estatus === 'entregado');
 
         if (entregados.length === 0) {
-            contenedorBuscar.innerHTML = '<p style="color: #777; font-size: 0.9em;">No hay lavadoras alquiladas pendientes por buscar.</p>';
+            contenedorBuscar.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9em;">No hay lavadoras alquiladas pendientes por buscar.</p>';
         } else {
             entregados.forEach(p => {
                 let clienteInfo = dbClientes.find(c => c.id === p.clienteId) || {};
@@ -1288,10 +1437,10 @@
                     <p><b>Punto de Referencia:</b> ${referencia}</p>
                     <p><b>Día y Hora de Entrega inicial:</b> ${formatearFechaDMY(p.fechaEntrega)}</p>
                     <p><b>Tiempo de Alquiler:</b> ${p.tiempoAlquiler}</p>
-                    <p style="color: var(--secondary);"><b>Fecha y Hora exacta para buscar la lavadora:</b> ${fechaBusquedaCalculada}</p>
+                    <p style="color: var(--border-gold);"><b>Fecha y Hora exacta para buscar la lavadora:</b> ${fechaBusquedaCalculada}</p>
                     <p><b>Modalidad de Pago:</b> ${p.modalidadPago || 'No especificada'} (${p.montoPagado ? '$' + p.montoPagado : 'Pendiente'})</p>
                     <div class="acciones-pedido">
-                        <button class="btn-secundario" onclick="abrirModalRetirar('${p.id}', '${p.lavadoraAsignada}')">🔄 Lavadora retirada o buscada</button>
+                        <button class="btn-secundario" style="background: var(--gold-btn-gradient); color: #000; border: none;" onclick="abrirModalRetirar('${p.id}', '${p.lavadoraAsignada}')">🔄 Lavadora retirada o buscada</button>
                         <button class="btn-peligro" onclick="abrirModalCancelar('${p.id}')">❌ Cancelar</button>
                     </div>
                 `;
@@ -1319,13 +1468,13 @@
         if(listaOpPedidos) {
             listaOpPedidos.innerHTML = '';
             if(pedidosFiltrados.length === 0) {
-                listaOpPedidos.innerHTML = '<p style="color:#777; font-size:0.85em;">No hay pedidos registrados en este lapso.</p>';
+                listaOpPedidos.innerHTML = '<p style="color: var(--text-muted); font-size:0.85em;">No hay pedidos registrados en este lapso.</p>';
             } else {
                 pedidosFiltrados.forEach(p => {
                     let div = document.createElement('div');
                     div.className = 'admin-item';
                     div.innerHTML = `
-                        <span><b>📅 ${formatearFechaDMY(p.fechaEntrega)}</b> | <b>${p.clienteNombre || 'Cliente'}</b> (Lav: N° ${p.lavadoraAsignada || 'N/A'}) - Monto: <b style="color:var(--accent);">$${p.montoPagado ? parseFloat(p.montoPagado).toFixed(2) : '0.00'}</b> [${p.estatus.toUpperCase()}]</span>
+                        <span><b>📅 ${formatearFechaDMY(p.fechaEntrega)}</b> | <b>${p.clienteNombre || 'Cliente'}</b> (Lav: N° ${p.lavadoraAsignada || 'N/A'}) - Monto: <b style="color:var(--accent-green);">$${p.montoPagado ? parseFloat(p.montoPagado).toFixed(2) : '0.00'}</b> [${p.estatus.toUpperCase()}]</span>
                         <div>
                             <button class="btn-accion" style="padding:4px 8px; font-size:0.75em;" onclick="abrirModalEditarPedidoOp('${p.id}')">✏️ Editar</button>
                             <button class="btn-peligro" style="padding:4px 8px; font-size:0.75em;" onclick="eliminarPedidoOp('${p.id}')">🗑️</button>
@@ -1419,7 +1568,7 @@
             listaRepFinanzas.appendChild(div);
         });
         if(repuestosFiltrados.length === 0) {
-            listaRepFinanzas.innerHTML = '<p style="color: #777; font-size: 0.85em; margin: 5px;">No hay repuestos registrados en este lapso.</p>';
+            listaRepFinanzas.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; margin: 5px;">No hay repuestos registrados en este lapso.</p>';
         }
         document.getElementById('fin-total-repuestos').textContent = totalRepuestos.toFixed(2);
 
@@ -1477,7 +1626,7 @@
                 listRankingLav.appendChild(div);
             });
             if(arrayLavadorasRanking.length === 0) {
-                listRankingLav.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">Sin servicios registrados en este lapso.</p>';
+                listRankingLav.innerHTML = '<p style="color: var(--text-muted); font-size:0.85em; margin:5px;">Sin servicios registrados en este lapso.</p>';
             }
         }
 
@@ -1498,12 +1647,12 @@
                 totalCancelados += cantidad;
                 let div = document.createElement('div');
                 div.className = 'admin-item';
-                div.innerHTML = `<span>❌ <b>${motivo}</b></span> <span style="color:var(--secondary); font-weight:bold;">${cantidad} veces</span>`;
+                div.innerHTML = `<span>❌ <b>${motivo}</b></span> <span style="color:var(--accent-red); font-weight:bold;">${cantidad} veces</span>`;
                 listCancelaciones.appendChild(div);
             }
         }
         if (totalCancelados === 0) {
-            listCancelaciones.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">No hay lavadoras canceladas registradas en este lapso.</p>';
+            listCancelaciones.innerHTML = '<p style="color: var(--text-muted); font-size:0.85em; margin:5px;">No hay lavadoras canceladas registradas en este lapso.</p>';
         }
 
         let statsClientes = {};
@@ -1539,11 +1688,11 @@
         topDinero.forEach((c, idx) => {
             let div = document.createElement('div');
             div.className = 'admin-item';
-            div.innerHTML = `<span><b>#${idx+1} ${c.nombre}</b></span> <span style="color:var(--accent); font-weight:bold;">$${c.dinero.toFixed(2)}</span>`;
+            div.innerHTML = `<span><b>#${idx+1} ${c.nombre}</b></span> <span style="color:var(--accent-green); font-weight:bold;">$${c.dinero.toFixed(2)}</span>`;
             listTopDinero.appendChild(div);
         });
         if(topDinero.length === 0 || topDinero.every(c => c.dinero === 0)) {
-            listTopDinero.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">Sin datos en este lapso.</p>';
+            listTopDinero.innerHTML = '<p style="color: var(--text-muted); font-size:0.85em; margin:5px;">Sin datos en este lapso.</p>';
         }
 
         let topIncidencias = [...arrayClientes].sort((a, b) => b.incidencias - a.incidencias).slice(0, 3);
@@ -1552,11 +1701,11 @@
         topIncidencias.forEach((c, idx) => {
             let div = document.createElement('div');
             div.className = 'admin-item';
-            div.innerHTML = `<span><b>#${idx+1} ${c.nombre}</b></span> <span style="color:var(--secondary); font-weight:bold;">${c.incidencias} incidencias</span>`;
+            div.innerHTML = `<span><b>#${idx+1} ${c.nombre}</b></span> <span style="color:var(--accent-red); font-weight:bold;">${c.incidencias} incidencias</span>`;
             listTopInc.appendChild(div);
         });
         if(topIncidencias.length === 0 || topIncidencias.every(c => c.incidencias === 0)) {
-            listTopInc.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">Sin incidencias en este lapso.</p>';
+            listTopInc.innerHTML = '<p style="color: var(--text-muted); font-size:0.85em; margin:5px;">Sin incidencias en este lapso.</p>';
         }
 
         calcularEstadisticasCliente();
@@ -1653,13 +1802,13 @@
             let descInc = inc.descripcionIncidencia || 'Sin descripción';
             let div = document.createElement('div');
             div.className = 'admin-item';
-            div.style.background = '#ffebee';
+            div.style.background = 'rgba(231, 76, 60, 0.15)';
             div.innerHTML = `<span>⚠️ <b>Incidencia:</b> ${descInc} | <b>Cliente:</b> ${clienteInc} | <b>Fecha:</b> ${fechaIncFmt}</span>`;
             listaRepContenedor.appendChild(div);
         });
 
         if(repuestosLavadora.length === 0 && incidenciasLavadora.length === 0) {
-            listaRepContenedor.innerHTML = '<p style="color:#777; font-size:0.85em; margin:5px;">Sin repuestos ni incidencias registrados en este lapso.</p>';
+            listaRepContenedor.innerHTML = '<p style="color: var(--text-muted); font-size:0.85em; margin:5px;">Sin repuestos ni incidencias registrados en este lapso.</p>';
         }
 
         document.getElementById('stat-lav-servicios').textContent = cantServicios;
@@ -1844,123 +1993,93 @@
     }
 
     function abrirModalCancelar(pedidoId) {
-        if(dbMotivos.length === 0) {
-            alert('⚠️ Debe agregar al menos un motivo de cancelación en la pestaña de Administración antes de cancelar.');
-            irAAdmin();
-            return;
-        }
         pedidoIdParaCancelar = pedidoId;
         document.getElementById('modal-cancelar').style.display = 'flex';
     }
 
     function confirmarCancelacionPedido() {
-        const motivoSelect = document.getElementById('select-motivo-cancelacion').value;
-        if(!motivoSelect) { alert('Seleccione un motivo.'); return; }
-
-        let pedidoObj = dbPedidos.find(p => p.id === pedidoIdParaCancelar);
+        const motivo = document.getElementById('select-motivo-cancelacion').value;
+        if(!motivo) { alert('Seleccione un motivo de cancelación.'); return; }
 
         db.collection("pedidos").doc(pedidoIdParaCancelar).update({
-            estatus: "cancelado",
-            motivoCancelacion: motivoSelect
+            estatus: 'cancelado',
+            motivoCancelacion: motivo
         }).then(() => {
-            if (pedidoObj && pedidoObj.estatus === 'entregado' && pedidoObj.modalidadPago === 'pago') {
-                db.collection("pedidos").doc(pedidoIdParaCancelar).update({
-                    montoPagado: 0
-                });
-            }
-
-            document.getElementById('modal-cancelar').style.display = 'none';
-            alert('Pedido cancelado correctamente. La lavadora vuelve a estar disponible.');
+            cerrarModal('modal-cancelar');
+            alert('Pedido cancelado correctamente.');
+            pedidoIdParaCancelar = null;
         });
     }
 
-    function abrirModalEntregar(pedidoId, lavadora, fecha, tiempo) {
-        document.getElementById('ent-pedido-id').value = pedidoId;
-        document.getElementById('ent-lavadora').value = lavadora;
-        document.getElementById('ent-fecha').value = fecha;
-        document.getElementById('ent-tiempo').innerHTML = `<option value="${tiempo}" selected>${tiempo}</option>`;
+    function abrirModalEntregar(id, lavadoraNum, fechaEntrega, tiempoAlquiler) {
+        document.getElementById('ent-pedido-id').value = id;
+        document.getElementById('ent-lavadora').value = lavadoraNum;
+        document.getElementById('ent-fecha').value = fechaEntrega;
+        document.getElementById('ent-tiempo').value = tiempoAlquiler;
         document.getElementById('ent-modalidad-pago').value = "";
-        document.getElementById('contenedor-monto').style.display = "none";
+        document.getElementById('contenedor-monto').style.display = 'none';
         document.getElementById('modal-entregar').style.display = 'flex';
     }
 
     function procesarEntregaFinal(event) {
         event.preventDefault();
-        const pedidoId = document.getElementById('ent-pedido-id').value;
+        const id = document.getElementById('ent-pedido-id').value;
         const lavadora = document.getElementById('ent-lavadora').value;
         const fecha = document.getElementById('ent-fecha').value;
         const tiempo = document.getElementById('ent-tiempo').value;
         const modalidad = document.getElementById('ent-modalidad-pago').value;
-        const monto = parseFloat(document.getElementById('ent-monto').value) || 0;
+        const monto = document.getElementById('ent-monto').value;
 
-        db.collection("pedidos").doc(pedidoId).update({
+        let dataUpdate = {
             lavadoraAsignada: lavadora,
             fechaEntrega: fecha,
             tiempoAlquiler: tiempo,
             modalidadPago: modalidad,
-            montoPagado: monto,
-            estatus: "entregado"
-        }).then(() => {
-            document.getElementById('modal-entregar').style.display = 'none';
-            alert('¡Entrega confirmada! La lavadora pasa a la pestaña de lavadoras por buscar.');
+            estatus: 'entregado'
+        };
+
+        if (modalidad === 'pago') {
+            dataUpdate.montoPagado = parseFloat(monto) || 0;
+        }
+
+        db.collection("pedidos").doc(id).update(dataUpdate).then(() => {
+            cerrarModal('modal-entregar');
+            alert('¡Entrega registrada con éxito! Lavadora marcada como alquilada.');
         });
     }
 
-    function abrirModalRetirar(pedidoId, lavadoraNum) {
-        let pedidoObj = dbPedidos.find(p => p.id === pedidoId);
-        
-        if (pedidoObj && pedidoObj.modalidadPago === 'paga al terminar' && (!pedidoObj.montoPagado || parseFloat(pedidoObj.montoPagado) <= 0)) {
-            let montoIngresado = prompt(`⚠️ Esta lavadora fue marcada como pendiente de pago al terminar.\nIngrese el monto cobrado ($) para poder registrar el retiro y finalizar:`, "0");
-            if (montoIngresado === null) return;
-            let montoNum = parseFloat(montoIngresado);
-            if (isNaN(montoNum) || montoNum <= 0) {
-                alert('❌ Debe ingresar un monto cobrado válido para poder registrar el retiro de la lavadora.');
-                return;
-            }
-            db.collection("pedidos").doc(pedidoId).update({
-                montoPagado: montoNum
-            });
-        }
-
-        document.getElementById('ret-pedido-id').value = pedidoId;
+    function abrirModalRetirar(id, lavadoraNum) {
+        document.getElementById('ret-pedido-id').value = id;
         document.getElementById('ret-lavadora-num').value = lavadoraNum;
+        const ahoraIso = new Date().toISOString().slice(0, 16);
+        document.getElementById('ret-fecha-hora').value = ahoraIso;
         document.getElementById('ret-estado-incidencia').value = "";
-        document.getElementById('ret-desc-incidencia').value = "";
-        document.getElementById('contenedor-descripcion-incidencia').style.display = "none";
-        
-        const ahora = new Date();
-        ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
-        document.getElementById('ret-fecha-hora').value = ahora.toISOString().slice(0,16);
-
+        document.getElementById('contenedor-descripcion-incidencia').style.display = 'none';
         document.getElementById('modal-retirar').style.display = 'flex';
     }
 
     function procesarRetiroFinal(event) {
         event.preventDefault();
-        const pedidoId = document.getElementById('ret-pedido-id').value;
-        const lavadoraNum = document.getElementById('ret-lavadora-num').value;
+        const id = document.getElementById('ret-pedido-id').value;
         const fechaRetiro = document.getElementById('ret-fecha-hora').value;
         const estadoIncidencia = document.getElementById('ret-estado-incidencia').value;
-        const descIncidencia = document.getElementById('ret-desc-incidencia').value || "Ninguna";
+        const descIncidencia = document.getElementById('ret-desc-incidencia').value;
 
-        db.collection("pedidos").doc(pedidoId).update({
-            estatus: "completado",
+        let dataUpdate = {
+            estatus: 'completado',
             fechaRetiro: fechaRetiro,
-            estadoIncidencia: estadoIncidencia,
-            descripcionIncidencia: descIncidencia
-        }).then(() => {
-            let lavDoc = dbLavadoras.find(l => l.numero === lavadoraNum);
-            if(lavDoc) {
-                db.collection("lavadoras").doc(lavDoc.id).update({
-                    estatusManual: "disponible"
-                });
-            }
+            estadoIncidencia: estadoIncidencia
+        };
 
-            document.getElementById('modal-retirar').style.display = 'none';
-            alert('¡Lavadora retirada con éxito! El estatus de la lavadora vuelve a estar disponible.');
+        if (estadoIncidencia === 'si hubo incidencia') {
+            dataUpdate.descripcionIncidencia = descIncidencia;
+        }
+
+        db.collection("pedidos").doc(id).update(dataUpdate).then(() => {
+            cerrarModal('modal-retirar');
+            alert('¡Retiro registrado con éxito! La lavadora vuelve a estar disponible.');
         });
     }
 </script>
-
 </body>
 </html>
