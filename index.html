@@ -635,7 +635,7 @@
     </div>
 </div>
 
-<!-- MODAL PARA RETIRAR / BUSCAR LAVADORA -->
+<!-- MODAL PARA RETIRAR / BUSCAR LAVADORA (CON VALIDACIÓN DE MONTO AÑADIDA) -->
 <div id="modal-retirar" class="modal-overlay">
     <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
         <h3 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">🔍 Registrar Retiro de Lavadora</h3>
@@ -645,6 +645,13 @@
 
             <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Fecha y Hora del Retiro:</label>
             <input type="datetime-local" id="ret-fecha-hora" class="input-field" required>
+
+            <!-- Contenedor dinámico para solicitar el monto si escogió "paga al terminar" -->
+            <div id="contenedor-monto-retiro" style="display: none; background: rgba(212, 175, 55, 0.08); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-gold);">
+                <label style="font-size: 0.85em; font-weight: bold; color: var(--border-gold);">Monto Pagado por el Servicio ($):</label>
+                <p style="font-size: 0.8em; color: var(--text-muted); margin: 2px 0 8px 0;">Este servicio se registró con la modalidad "Paga cuando termina el servicio". Ingrese el monto cobrado:</p>
+                <input type="number" step="0.01" id="ret-monto-terminar" class="input-field" placeholder="Ingrese el monto pagado" style="margin-bottom: 0;">
+            </div>
 
             <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">¿Hubo alguna incidencia con el servicio?</label>
             <select id="ret-estado-incidencia" class="input-field" onchange="toggleCampoIncidencia()" required>
@@ -1381,6 +1388,68 @@
         }
     }
 
+    // FUNCIÓN ACTUALIZADA PARA ABRIR EL MODAL DE RETIRO CON LA VALIDACIÓN DE PAGO AL TERMINAR
+    function abrirModalRetirar(pedidoId, lavadoraNum) {
+        document.getElementById('ret-pedido-id').value = pedidoId;
+        document.getElementById('ret-lavadora-num').value = lavadoraNum;
+        
+        let ahoraIso = new Date().toISOString().slice(0, 16);
+        document.getElementById('ret-fecha-hora').value = ahoraIso;
+        
+        document.getElementById('ret-estado-incidencia').value = '';
+        document.getElementById('ret-desc-incidencia').value = '';
+        document.getElementById('contenedor-descripcion-incidencia').style.display = 'none';
+
+        // Validar si el pedido escogió la opción "paga al terminar"
+        let pedidoObj = dbPedidos.find(p => p.id === pedidoId);
+        let contenedorMontoRetiro = document.getElementById('contenedor-monto-retiro');
+        let inputMontoTerminar = document.getElementById('ret-monto-terminar');
+
+        if (pedidoObj && pedidoObj.modalidadPago === 'paga al terminar') {
+            contenedorMontoRetiro.style.display = 'block';
+            inputMontoTerminar.required = true;
+            inputMontoTerminar.value = '';
+        } else {
+            contenedorMontoRetiro.style.display = 'none';
+            inputMontoTerminar.required = false;
+            inputMontoTerminar.value = '';
+        }
+
+        document.getElementById('modal-retirar').style.display = 'flex';
+    }
+
+    // FUNCIÓN DE PROCESAR RETIRO ACTUALIZADA PARA GUARDAR EL MONTO SI APLICA
+    function procesarRetiroFinal(event) {
+        event.preventDefault();
+        let pedidoId = document.getElementById('ret-pedido-id').value;
+        let fechaRetiro = document.getElementById('ret-fecha-hora').value;
+        let estadoIncidencia = document.getElementById('ret-estado-incidencia').value;
+        let descIncidencia = document.getElementById('ret-desc-incidencia').value;
+        
+        let pedidoObj = dbPedidos.find(p => p.id === pedidoId);
+        let actualizaciones = {
+            estatus: 'completado',
+            fechaRetiro: fechaRetiro,
+            huboIncidencia: estadoIncidencia,
+            descripcionIncidencia: descIncidencia
+        };
+
+        // Si es pago al terminar, capturamos y validamos el monto ingresado
+        if (pedidoObj && pedidoObj.modalidadPago === 'paga al terminar') {
+            let montoIngresado = parseFloat(document.getElementById('ret-monto-terminar').value);
+            if (isNaN(montoIngresado) || montoIngresado < 0) {
+                alert('Por favor ingrese un monto pagado válido.');
+                return;
+            }
+            actualizaciones.montoPagado = montoIngresado;
+        }
+
+        db.collection("pedidos").doc(pedidoId).update(actualizaciones).then(() => {
+            cerrarModal('modal-retirar');
+            alert('¡Retiro de lavadora registrado con éxito! La lavadora vuelve a estar disponible.');
+        });
+    }
+
     function actualizarRegistroOperacionesUI() {
         const listaOpPedidos = document.getElementById('lista-operaciones-pedidos');
         const contadorServiciosOp = document.getElementById('contador-servicios-op');
@@ -1799,45 +1868,25 @@
         if(!texto) return;
 
         db.collection("motivos_cancelacion").add({ texto }).then(() => {
-            alert('Motivo de cancelación agregado.');
+            alert('Motivo agregado.');
             document.getElementById('form-admin-motivo').reset();
-        });
-    }
-
-    function registrarGastoRepuesto(event) {
-        event.preventDefault();
-        let nombre = document.getElementById('rep-seleccionado').value;
-        let costo = parseFloat(document.getElementById('rep-costo').value) || 0;
-        let lavadoraNum = document.getElementById('rep-lavadora-num').value;
-        let pagadoPor = document.getElementById('rep-pagado-por').value;
-
-        db.collection("gastos_repuestos").add({
-            nombre,
-            costo,
-            lavadoraNum,
-            pagadoPor,
-            fecha: new Date().toISOString()
-        }).then(() => {
-            alert('¡Gasto de repuesto registrado correctamente!');
-            document.getElementById('form-gasto-repuesto').reset();
         });
     }
 
     function guardarPedido(event) {
         event.preventDefault();
         let clienteId = document.getElementById('ped-cliente').value;
-        let busquedaInput = document.getElementById('busqueda-cliente-input').value;
         let fechaEntrega = document.getElementById('ped-fecha-entrega').value;
         let tiempoAlquiler = document.getElementById('ped-tiempo').value;
         let lavadoraAsignada = document.getElementById('ped-lavadora').value;
 
         if (!clienteId) {
-            alert('Por favor seleccione un cliente válido usando el buscador predictivo.');
+            alert('Por favor seleccione un cliente válido usando el buscador.');
             return;
         }
 
         if (!lavadoraAsignada) {
-            alert('No hay ninguna lavadora disponible seleccionada.');
+            alert('No hay lavadoras disponibles para asignar.');
             return;
         }
 
@@ -1845,24 +1894,56 @@
 
         db.collection("pedidos").add({
             clienteId: clienteId,
-            clienteNombre: clienteObj.nombre || busquedaInput,
+            clienteNombre: clienteObj.nombre || 'Cliente',
             direccion: clienteObj.direccion || '',
             referencia: clienteObj.referencia || '',
             fechaEntrega: fechaEntrega,
             tiempoAlquiler: tiempoAlquiler,
             lavadoraAsignada: lavadoraAsignada,
             estatus: 'pendiente',
-            fechaCreacion: new Date().toISOString()
+            modalidadPago: null,
+            montoPagado: null,
+            huboIncidencia: null,
+            descripcionIncidencia: null
         }).then(() => {
-            alert('¡Pedido registrado con éxito como pendiente!');
+            alert('¡Pedido registrado con éxito! Ahora se encuentra en la pestaña de lavadoras por entregar.');
             document.getElementById('form-agregar-pedido').reset();
+            document.getElementById('busqueda-cliente-input').value = '';
             document.getElementById('ped-cliente').value = '';
             document.getElementById('cliente-seleccionado-badge').style.display = 'none';
         });
     }
 
+    function abrirModalEntregar(pedidoId, lavadoraNum, fechaEntrega, tiempoAlquiler) {
+        document.getElementById('ent-pedido-id').value = pedidoId;
+        document.getElementById('ent-lavadora').value = lavadoraNum;
+        document.getElementById('ent-fecha').value = fechaEntrega;
+        document.getElementById('ent-tiempo').value = tiempoAlquiler;
+        document.getElementById('ent-modalidad-pago').value = '';
+        document.getElementById('ent-monto').value = '';
+        document.getElementById('contenedor-monto').style.display = 'none';
+        document.getElementById('modal-entregar').style.display = 'flex';
+    }
+
+    function procesarEntregaFinal(event) {
+        event.preventDefault();
+        let pedidoId = document.getElementById('ent-pedido-id').value;
+        let modalidad = document.getElementById('ent-modalidad-pago').value;
+        let monto = modalidad === 'pago' ? parseFloat(document.getElementById('ent-monto').value) || 0 : null;
+
+        db.collection("pedidos").doc(pedidoId).update({
+            estatus: 'entregado',
+            modalidadPago: modalidad,
+            montoPagado: monto
+        }).then(() => {
+            cerrarModal('modal-entregar');
+            alert('¡Lavadora entregada y marcada como alquilada con éxito!');
+        });
+    }
+
     function abrirModalCancelar(pedidoId) {
         pedidoIdParaCancelar = pedidoId;
+        document.getElementById('select-motivo-cancelacion').value = '';
         document.getElementById('modal-cancelar').style.display = 'flex';
     }
 
@@ -1873,71 +1954,38 @@
             return;
         }
 
+        if (!pedidoIdParaCancelar) return;
+
         db.collection("pedidos").doc(pedidoIdParaCancelar).update({
             estatus: 'cancelado',
             motivoCancelacion: motivo
         }).then(() => {
             cerrarModal('modal-cancelar');
-            alert('Pedido cancelado correctamente.');
+            pedidoIdParaCancelar = null;
+            alert('El pedido ha sido cancelado correctamente.');
         });
     }
 
-    function abrirModalEntregar(id, lavadora, fecha, tiempo) {
-        document.getElementById('ent-pedido-id').value = id;
-        document.getElementById('ent-lavadora').value = lavadora;
-        document.getElementById('ent-fecha').value = fecha;
-        document.getElementById('ent-tiempo').value = tiempo;
-        document.getElementById('ent-modalidad-pago').value = '';
-        document.getElementById('ent-monto').value = '';
-        document.getElementById('contenedor-monto').style.display = 'none';
-        document.getElementById('modal-entregar').style.display = 'flex';
-    }
-
-    function procesarEntregaFinal(event) {
+    function registrarGastoRepuesto(event) {
         event.preventDefault();
-        let id = document.getElementById('ent-pedido-id').value;
-        let modalidadPago = document.getElementById('ent-modalidad-pago').value;
-        let montoPagado = modalidadPago === 'pago' ? parseFloat(document.getElementById('ent-monto').value) || 0 : 0;
+        let nombre = document.getElementById('rep-seleccionado').value;
+        let costo = parseFloat(document.getElementById('rep-costo').value) || 0;
+        let lavadoraNum = document.getElementById('rep-lavadora-num').value;
+        let pagadoPor = document.getElementById('rep-pagado-por').value;
+        let fechaHoy = new Date().toISOString();
 
-        db.collection("pedidos").doc(id).update({
-            estatus: 'entregado',
-            modalidadPago: modalidadPago,
-            montoPagado: montoPagado
+        db.collection("gastos_repuestos").add({
+            nombre: nombre,
+            costo: costo,
+            lavadoraNum: lavadoraNum,
+            pagadoPor: pagadoPor,
+            fecha: fechaHoy
         }).then(() => {
-            cerrarModal('modal-entregar');
-            alert('¡Lavadora entregada y marcada como alquilada con éxito!');
-        });
-    }
-
-    function abrirModalRetirar(id, lavadoraNum) {
-        document.getElementById('ret-pedido-id').value = id;
-        document.getElementById('ret-lavadora-num').value = lavadoraNum;
-        
-        let ahoraIso = new Date().toISOString().slice(0, 16);
-        document.getElementById('ret-fecha-hora').value = ahoraIso;
-        document.getElementById('ret-estado-incidencia').value = '';
-        document.getElementById('ret-desc-incidencia').value = '';
-        document.getElementById('contenedor-descripcion-incidencia').style.display = 'none';
-
-        document.getElementById('modal-retirar').style.display = 'flex';
-    }
-
-    function procesarRetiroFinal(event) {
-        event.preventDefault();
-        let id = document.getElementById('ret-pedido-id').value;
-        let estadoIncidencia = document.getElementById('ret-estado-incidencia').value;
-        let descIncidencia = document.getElementById('ret-desc-incidencia').value;
-
-        db.collection("pedidos").doc(id).update({
-            estatus: 'completado',
-            huboIncidencia: estadoIncidencia,
-            descripcionIncidencia: descIncidencia,
-            fechaRetiro: document.getElementById('ret-fecha-hora').value
-        }).then(() => {
-            cerrarModal('modal-retirar');
-            alert('¡Lavadora retirada y marcada como disponible nuevamente!');
+            alert('¡Compra de repuesto registrada con éxito!');
+            document.getElementById('form-gasto-repuesto').reset();
         });
     }
 </script>
+
 </body>
 </html>
