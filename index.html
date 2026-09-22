@@ -429,7 +429,7 @@
                 <div id="est-contenedor-filtros-extra" style="margin-top: 10px;"></div>
             </div>
 
-            <!-- Nuevo Apartado: Promedio general de alquileres de lavadoras en la barra -->
+            <!-- Promedio general de alquileres de lavadoras en la barra -->
             <div class="seccion-form" style="background: rgba(212,175,55,0.05); border-color: var(--border-gold);">
                 <h5 style="color: var(--border-gold);">📈 Promedio de Alquileres en la Barra (en el lapso)</h5>
                 <p style="font-size: 0.9em; margin: 4px 0;"><b>Total de servicios en el lapso:</b> <span id="stat-barra-total-servicios" style="font-weight: bold; color: var(--text-main);">0</span></p>
@@ -448,12 +448,12 @@
 
             <div class="flex-row" style="gap: 15px; align-items: stretch; flex-wrap: wrap;">
                 <div class="seccion-form" style="flex: 1; min-width: 280px;">
-                    <h5 style="color: var(--border-gold);">🏆 Top 3: Aportadores de Dinero</h5>
-                    <div id="top-clientes-dinero" class="admin-list" style="max-height: 150px;"></div>
+                    <h5 style="color: var(--border-gold);">🏆 Todos los Clientes: Aportadores de Dinero</h5>
+                    <div id="top-clientes-dinero" class="admin-list" style="max-height: 180px;"></div>
                 </div>
                 <div class="seccion-form" style="flex: 1; min-width: 280px;">
-                    <h5 style="color: var(--accent-red);">⚠️ Top 3: Clientes con Más Incidencias</h5>
-                    <div id="top-clientes-incidencias" class="admin-list" style="max-height: 150px;"></div>
+                    <h5 style="color: var(--accent-red);">⚠️ Todos los Clientes con Incidencias</h5>
+                    <div id="top-clientes-incidencias" class="admin-list" style="max-height: 180px;"></div>
                 </div>
             </div>
 
@@ -468,6 +468,10 @@
                     <p><b>Cantidad de incidencias al buscar la lavadora:</b> <span id="stat-cli-incidencias">0</span></p>
                     <p><b>Cantidad de dinero aportado a Lavarapido:</b> $<span id="stat-cli-dinero">0.00</span></p>
                     <p><b>Promedio de frecuencia de alquiler:</b> <span id="stat-cli-promedio" style="color: var(--border-gold); font-weight: bold;">--</span></p>
+                    
+                    <p style="margin-top: 12px;"><b>Lavadoras alquiladas y fechas (en el lapso):</b></p>
+                    <div id="stat-cli-lavadoras-list" class="admin-list" style="max-height: 150px; background: var(--bg-card); margin-top: 5px;"></div>
+
                     <p style="margin-top: 12px;"><b>Historial de Incidencias:</b></p>
                     <div id="stat-cli-incidencias-list" class="admin-list" style="max-height: 150px; background: var(--bg-card); margin-top: 5px;"></div>
                 </div>
@@ -482,6 +486,10 @@
                 <div id="resultado-stats-lavadora" style="background: var(--bg-deep); border: 1px solid rgba(212,175,55,0.2); padding: 12px; border-radius: 8px; margin-top: 10px; display: none; font-size: 0.9em;">
                     <p><b>Cantidad de servicios realizados:</b> <span id="stat-lav-servicios">0</span></p>
                     <p><b>Cantidad de dinero generado:</b> $<span id="stat-lav-dinero">0.00</span></p>
+                    
+                    <p style="margin-top: 8px;"><b>Clientes que la alquilaron con su fecha (en el lapso):</b></p>
+                    <div id="stat-lav-clientes-list" class="admin-list" style="max-height: 150px; background: var(--bg-card); margin-top: 5px;"></div>
+
                     <p style="margin-top: 8px;"><b>Listado de repuestos (con fecha de adquisición) e incidencias generadas:</b></p>
                     <div id="stat-lav-repuestos-list" class="admin-list" style="max-height: 150px; background: var(--bg-card); margin-top: 5px;"></div>
                 </div>
@@ -648,7 +656,7 @@
     </div>
 </div>
 
-<!-- MODAL PARA RETIRAR / BUSCAR LAVADORA (CON VALIDACIÓN DE MONTO AÑADIDA) -->
+<!-- MODAL PARA RETIRAR / BUSCAR LAVADORA -->
 <div id="modal-retirar" class="modal-overlay">
     <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
         <h3 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">🔍 Registrar Retiro de Lavadora</h3>
@@ -659,7 +667,6 @@
             <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Fecha y Hora del Retiro:</label>
             <input type="datetime-local" id="ret-fecha-hora" class="input-field" required>
 
-            <!-- Contenedor dinámico para solicitar el monto si escogió "paga al terminar" -->
             <div id="contenedor-monto-retiro" style="display: none; background: rgba(212, 175, 55, 0.08); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-gold);">
                 <label style="font-size: 0.85em; font-weight: bold; color: var(--border-gold);">Monto Pagado por el Servicio ($):</label>
                 <p style="font-size: 0.8em; color: var(--text-muted); margin: 2px 0 8px 0;">Este servicio se registró con la modalidad "Paga cuando termina el servicio". Ingrese el monto cobrado:</p>
@@ -1647,7 +1654,6 @@
         const rango = document.getElementById('est-rango').value;
         let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango, 'est');
 
-        // Cálculo para el nuevo apartado: Promedio general de alquileres en la barra
         let totalServiciosLapso = pedidosFiltrados.filter(p => p.estatus !== 'cancelado').length;
         document.getElementById('stat-barra-total-servicios').textContent = totalServiciosLapso;
         
@@ -1734,242 +1740,246 @@
             });
         }
 
-        let clientesDinero = {};
-        let clientesIncidencias = {};
+        let clientesDineroMap = {};
+        let clientesServiciosMap = {};
+        let clientesIncidenciasMap = {};
+        let clientesIncidenciasDetalles = {};
 
         pedidosFiltrados.forEach(p => {
             if (!p.clienteId) return;
-            let cliId = p.clienteId;
-            let cliObj = dbClientes.find(c => c.id === cliId);
+            let cliObj = dbClientes.find(c => c.id === p.clienteId);
             let nombreCli = cliObj ? cliObj.nombre : (p.clienteNombre || 'Cliente');
 
-            if (p.estatus !== 'cancelado' && p.montoPagado) {
-                clientesDinero[nombreCli] = (clientesDinero[nombreCli] || 0) + (parseFloat(p.montoPagado) || 0);
+            if (p.estatus !== 'cancelado') {
+                clientesServiciosMap[nombreCli] = (clientesServiciosMap[nombreCli] || 0) + 1;
+                if (p.montoPagado) {
+                    clientesDineroMap[nombreCli] = (clientesDineroMap[nombreCli] || 0) + (parseFloat(p.montoPagado) || 0);
+                }
             }
 
             if (p.huboIncidencia === 'si hubo incidencia') {
-                clientesIncidencias[nombreCli] = (clientesIncidencias[nombreCli] || 0) + 1;
+                clientesIncidenciasMap[nombreCli] = (clientesIncidenciasMap[nombreCli] || 0) + 1;
+                if (!clientesIncidenciasDetalles[nombreCli]) clientesIncidenciasDetalles[nombreCli] = [];
+                clientesIncidenciasDetalles[nombreCli].push({
+                    lavadora: p.lavadoraAsignada || 'N/A',
+                    fecha: formatearFechaDMY(p.fechaRetiro || p.fechaEntrega)
+                });
             }
         });
 
+        // 4. Actualizar todos los clientes que aportan dinero ordenados de mayor a menor con cantidad de servicios y monto
         let topDineroList = document.getElementById('top-clientes-dinero');
         topDineroList.innerHTML = '';
-        let topDineroArr = Object.keys(clientesDinero).sort((a,b) => clientesDinero[b] - clientesDinero[a]).slice(0, 3);
-        if(topDineroArr.length === 0) {
+        let todosClientesDineroArr = Object.keys(clientesDineroMap).sort((a,b) => clientesDineroMap[b] - clientesDineroMap[a]);
+        if(todosClientesDineroArr.length === 0) {
             topDineroList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; margin: 5px;">Sin datos.</p>';
         } else {
-            topDineroArr.forEach(nombre => {
+            todosClientesDineroArr.forEach(nombre => {
+                let servs = clientesServiciosMap[nombre] || 0;
+                let monto = clientesDineroMap[nombre] || 0;
                 let div = document.createElement('div');
                 div.className = 'admin-item';
-                div.innerHTML = `<span>👤 ${nombre}</span> <b style="color: var(--accent-green);">$${clientesDinero[nombre].toFixed(2)}</b>`;
+                div.innerHTML = `<span>👤 <b>${nombre}</b><br><span style="color: var(--text-muted); font-size: 0.8em;">${servs} servicios</span></span> <b style="color: var(--accent-green);">$${monto.toFixed(2)}</b>`;
                 topDineroList.appendChild(div);
             });
         }
 
+        // 3. Actualizar cuadro de incidencias con todos los clientes que han tenido incidencias, número de lavadora y cantidad de incidencias
         let topIncList = document.getElementById('top-clientes-incidencias');
         topIncList.innerHTML = '';
-        let topIncArr = Object.keys(clientesIncidencias).sort((a,b) => clientesIncidencias[b] - clientesIncidencias[a]).slice(0, 3);
-        if(topIncArr.length === 0) {
-            topIncList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; margin: 5px;">Sin incidencias.</p>';
+        let todosClientesIncArr = Object.keys(clientesIncidenciasMap).sort((a,b) => clientesIncidenciasMap[b] - clientesIncidenciasMap[a]);
+        if(todosClientesIncArr.length === 0) {
+            topIncList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; margin: 5px;">Sin incidencias registradas.</p>';
         } else {
-            topIncArr.forEach(nombre => {
+            todosClientesIncArr.forEach(nombre => {
+                let cantInc = clientesIncidenciasMap[nombre];
+                let detalles = clientesIncidenciasDetalles[nombre] || [];
+                let lavadorasStr = [...new Set(detalles.map(d => d.lavadora))].join(', ');
                 let div = document.createElement('div');
                 div.className = 'admin-item';
-                div.innerHTML = `<span>👤 ${nombre}</span> <b style="color: var(--accent-red);">${clientesIncidencias[nombre]} incidencias</b>`;
+                div.innerHTML = `<span>⚠️ <b>${nombre}</b><br><span style="color: var(--border-gold); font-size: 0.8em;">Lavadora(s): N° ${lavadorasStr}</span></span> <b style="color: var(--accent-red);">${cantInc} incidencia(s)</b>`;
                 topIncList.appendChild(div);
             });
         }
 
-        if(document.getElementById('est-cliente-select') && document.getElementById('est-cliente-select').value) {
+        if(document.getElementById('est-cliente-select').value) {
             calcularEstadisticasCliente();
+        }
+        if(document.getElementById('est-lavadora-select').value) {
+            calcularEstadisticasLavadora();
         }
     }
 
+    // 1. Módulo seleccionar cliente en estadística (incluye scroll con todas las lavadoras alquiladas y fecha en el lapso)
     function calcularEstadisticasCliente() {
         const clienteId = document.getElementById('est-cliente-select').value;
+        const rango = document.getElementById('est-rango').value;
         const resultadoDiv = document.getElementById('resultado-stats-cliente');
-        if (!clienteId) return;
 
-        let pedidosCliente = dbPedidos.filter(p => p.clienteId === clienteId && p.estatus !== 'cancelado');
-        // Ordenar cronológicamente por fecha de entrega
-        pedidosCliente.sort((a, b) => new Date(a.fechaEntrega || 0) - new Date(b.fechaEntrega || 0));
+        if (!clienteId) {
+            resultadoDiv.style.display = 'none';
+            return;
+        }
+
+        let clienteObj = dbClientes.find(c => c.id === clienteId);
+        let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango, 'est');
+        let pedidosCliente = pedidosFiltrados.filter(p => p.clienteId === clienteId && p.estatus !== 'cancelado');
 
         let totalServicios = pedidosCliente.length;
-        let incidenciasCliente = dbPedidos.filter(p => p.clienteId === clienteId && p.huboIncidencia === 'si hubo incidencia');
-        let totalIncidencias = incidenciasCliente.length;
-        
-        let dineroAportado = 0;
+        let totalIncidencias = pedidosCliente.filter(p => p.huboIncidencia === 'si hubo incidencia').length;
+        let totalDinero = 0;
         pedidosCliente.forEach(p => {
-            if (p.montoPagado) {
-                dineroAportado += parseFloat(p.montoPagado) || 0;
-            }
+            if (p.montoPagado) totalDinero += parseFloat(p.montoPagado) || 0;
         });
 
-        // Cálculo del promedio de frecuencia de alquiler del cliente
-        let promedioFrecuenciaTexto = 'Insuficientes servicios para calcular promedio';
+        let promedioTexto = '--';
         if (totalServicios > 1) {
-            let diferenciasDias = [];
-            for (let i = 1; i < pedidosCliente.length; i++) {
-                let fechaPrev = new Date(pedidosCliente[i - 1].fechaEntrega);
-                let fechaAct = new Date(pedidosCliente[i].fechaEntrega);
-                let diffMs = fechaAct - fechaPrev;
-                let diffDias = diffMs / (1000 * 60 * 60 * 24);
-                if (diffDias >= 0) {
-                    diferenciasDias.push(diffDias);
-                }
+            let fechas = pedidosCliente.map(p => new Date(p.fechaEntrega).getTime()).sort((a,b) => a - b);
+            let diffs = [];
+            for (let i = 1; i < fechas.length; i++) {
+                diffs.push(fechas[i] - fechas[i-1]);
             }
-            if (diferenciasDias.length > 0) {
-                let sumaDias = diferenciasDias.reduce((acc, val) => acc + val, 0);
-                let promedioDias = sumaDias / diferenciasDias.length;
-
-                if (promedioDias < 1) {
-                    let horas = promedioDias * 24;
-                    promedioFrecuenciaTexto = `Cada ${horas.toFixed(1)} horas`;
-                } else {
-                    promedioFrecuenciaTexto = `Cada ${promedioDias.toFixed(1)} días`;
-                }
-            }
-        } else if (totalServicios === 1) {
-            promedioFrecuenciaTexto = 'Registrado 1 servicio (se requieren más para calcular frecuencia)';
+            let promedioMs = diffs.reduce((a,b) => a + b, 0) / diffs.length;
+            let promedioDias = promedioMs / (1000 * 60 * 60 * 24);
+            promedioTexto = `Cada ${promedioDias.toFixed(1)} días aprox.`;
+        } else {
+            promedioTexto = 'Insuficientes servicios para promedio';
         }
 
         document.getElementById('stat-cli-servicios').textContent = totalServicios;
         document.getElementById('stat-cli-incidencias').textContent = totalIncidencias;
-        document.getElementById('stat-cli-dinero').textContent = dineroAportado.toFixed(2);
-        document.getElementById('stat-cli-promedio').textContent = promedioFrecuenciaTexto;
+        document.getElementById('stat-cli-dinero').textContent = totalDinero.toFixed(2);
+        document.getElementById('stat-cli-promedio').textContent = promedioTexto;
 
-        let listaCliIncList = document.getElementById('stat-cli-incidencias-list');
-        listaCliIncList.innerHTML = '';
+        // Scroll de lavadoras alquiladas y fecha en el lapso seleccionado
+        let listaLavadorasCli = document.getElementById('stat-cli-lavadoras-list');
+        listaLavadorasCli.innerHTML = '';
+        if (pedidosCliente.length === 0) {
+            listaLavadorasCli.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; padding: 5px;">No hay lavadoras alquiladas en este lapso.</p>';
+        } else {
+            pedidosCliente.forEach(p => {
+                let div = document.createElement('div');
+                div.className = 'admin-item';
+                div.innerHTML = `<span>🧺 <b>Lavadora N° ${p.lavadoraAsignada || 'N/A'}</b></span> <span style="color: var(--border-gold);">${formatearFechaDMY(p.fechaEntrega)}</span>`;
+                listaLavadorasCli.appendChild(div);
+            });
+        }
+
+        let listaInc = document.getElementById('stat-cli-incidencias-list');
+        listaInc.innerHTML = '';
+        let incidenciasCliente = pedidosCliente.filter(p => p.huboIncidencia === 'si hubo incidencia');
         if (incidenciasCliente.length === 0) {
-            listaCliIncList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; padding: 5px;">No hay incidencias registradas para este cliente.</p>';
+            listaInc.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; padding: 5px;">No hay incidencias registradas para este cliente en el lapso.</p>';
         } else {
             incidenciasCliente.forEach(p => {
                 let div = document.createElement('div');
                 div.className = 'admin-item';
-                div.innerHTML = `<span>⚠️ <b>Lavadora N° ${p.lavadoraAsignada || 'N/A'}</b> (Fecha: ${formatearFechaDMY(p.fechaRetiro || p.fechaEntrega)})<br><span style="color: var(--text-muted);">Desc: ${p.descripcionIncidencia || 'Sin descripción'}</span></span>`;
-                listaCliIncList.appendChild(div);
+                div.innerHTML = `<span>🧺 <b>Lav. N° ${p.lavadoraAsignada}</b>: ${p.descripcionIncidencia || 'Sin descripción'}</span> <span style="color: var(--text-muted);">${formatearFechaDMY(p.fechaEntrega)}</span>`;
+                listaInc.appendChild(div);
             });
         }
 
         resultadoDiv.style.display = 'block';
     }
 
+    // 2. Módulo seleccionar lavadora en estadística (incluye clientes que la alquilaron con su fecha en el lapso)
     function calcularEstadisticasLavadora() {
         const lavadoraNum = document.getElementById('est-lavadora-select').value;
+        const rango = document.getElementById('est-rango').value;
         const resultadoDiv = document.getElementById('resultado-stats-lavadora');
-        if (!lavadoraNum) return;
 
-        let pedidosLav = dbPedidos.filter(p => p.lavadoraAsignada == lavadoraNum && p.estatus !== 'cancelado');
-        let totalServicios = pedidosLav.length;
-        let dineroGenerado = 0;
-        pedidosLav.forEach(p => {
-            if (p.montoPagado) dineroGenerado += parseFloat(p.montoPagado) || 0;
-        });
-
-        document.getElementById('stat-lav-servicios').textContent = totalServicios;
-        document.getElementById('stat-lav-dinero').textContent = dineroGenerado.toFixed(2);
-
-        let repuestosLav = dbGastosRepuestos.filter(r => r.lavadoraNum == lavadoraNum);
-        let incidenciasLav = dbPedidos.filter(p => p.lavadoraAsignada == lavadoraNum && p.huboIncidencia === 'si hubo incidencia');
-        
-        let listaRepList = document.getElementById('stat-lav-repuestos-list');
-        listaRepList.innerHTML = '';
-
-        let itemsCombinados = [];
-
-        repuestosLav.forEach(r => {
-            itemsCombinados.push({
-                tipo: 'repuesto',
-                fecha: r.fecha || '',
-                html: `⚙️ <b>[Repuesto] ${r.nombre}</b> (Fecha: ${formatearFechaDMY(r.fecha)}) - Costo: ${r.costo}`
-            });
-        });
-
-        incidenciasLav.forEach(p => {
-            itemsCombinados.push({
-                tipo: 'incidencia',
-                fecha: p.fechaRetiro || p.fechaEntrega || '',
-                html: `⚠️ <b>[Incidencia]</b> Cliente: <b>${p.clienteNombre || 'Cliente'}</b> (Fecha: ${formatearFechaDMY(p.fechaRetiro || p.fechaEntrega)})<br><span style="color: var(--accent-red);">Desc: ${p.descripcionIncidencia || 'Sin descripción'}</span>`
-            });
-        });
-
-        itemsCombinados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-        if (itemsCombinados.length === 0) {
-            listaRepList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; padding: 5px;">No hay repuestos ni incidencias registradas para esta lavadora.</p>';
-        } else {
-            itemsCombinados.forEach(item => {
-                let div = document.createElement('div');
-                div.className = 'admin-item';
-                div.innerHTML = `<span>${item.html}</span>`;
-                listaRepList.appendChild(div);
-            });
-        }
-
-        resultadoDiv.style.display = 'block';
-    }
-
-    function guardarClienteRapido() {
-        let nombre = document.getElementById('cli-nombre-rapido').value.trim();
-        let telefono = document.getElementById('cli-telefono-rapido').value.trim();
-        let direccion = document.getElementById('cli-direccion-rapido').value.trim();
-        let referencia = document.getElementById('cli-referencia-rapido').value.trim();
-
-        if (!nombre || !telefono) {
-            alert('Por favor ingrese al menos el nombre y el teléfono del cliente.');
+        if (!lavadoraNum) {
+            resultadoDiv.style.display = 'none';
             return;
         }
 
-        db.collection("clientes").add({
-            nombre: nombre,
-            telefono: telefono,
-            direccion: direccion,
-            referencia: referencia
-        }).then((docRef) => {
-            alert('¡Cliente registrado con éxito!');
-            document.getElementById('cli-nombre-rapido').value = '';
-            document.getElementById('cli-telefono-rapido').value = '';
-            document.getElementById('cli-direccion-rapido').value = '';
-            document.getElementById('cli-referencia-rapido').value = '';
-            toggleFormCliente();
-            seleccionarClienteAutocomplete(docRef.id, nombre, direccion);
+        let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango, 'est');
+        let pedidosLavadora = pedidosFiltrados.filter(p => p.lavadoraAsignada == lavadoraNum && p.estatus !== 'cancelado');
+
+        let totalServicios = pedidosLavadora.length;
+        let totalDinero = 0;
+        pedidosLavadora.forEach(p => {
+            if (p.montoPagado) totalDinero += parseFloat(p.montoPagado) || 0;
         });
+
+        document.getElementById('stat-lav-servicios').textContent = totalServicios;
+        document.getElementById('stat-lav-dinero').textContent = totalDinero.toFixed(2);
+
+        // Listado de clientes que la alquilaron con su fecha en el lapso seleccionado
+        let listaClientesLav = document.getElementById('stat-lav-clientes-list');
+        listaClientesLav.innerHTML = '';
+        if (pedidosLavadora.length === 0) {
+            listaClientesLav.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; padding: 5px;">No hay registros de alquiler para esta lavadora en el lapso.</p>';
+        } else {
+            pedidosLavadora.forEach(p => {
+                let div = document.createElement('div');
+                div.className = 'admin-item';
+                div.innerHTML = `<span>👤 <b>${p.clienteNombre || 'Cliente'}</b></span> <span style="color: var(--border-gold);">${formatearFechaDMY(p.fechaEntrega)}</span>`;
+                listaClientesLav.appendChild(div);
+            });
+        }
+
+        let repuestosFiltrados = filtrarPorRangoFecha(dbGastosRepuestos, 'fecha', rango, 'fin');
+        let repuestosLavadora = repuestosFiltrados.filter(r => r.lavadoraNum == lavadoraNum);
+
+        let listaRepuestosLav = document.getElementById('stat-lav-repuestos-list');
+        listaRepuestosLav.innerHTML = '';
+
+        repuestosLavadora.forEach(r => {
+            let div = document.createElement('div');
+            div.className = 'admin-item';
+            div.innerHTML = `<span>⚙️ <b>${r.nombre}</b> (Costo: $${r.costo})</span> <span style="color: var(--text-muted);">${formatearFechaDMY(r.fecha)}</span>`;
+            listaRepuestosLav.appendChild(div);
+        });
+
+        let incidenciasLavadora = pedidosFiltrados.filter(p => p.lavadoraAsignada == lavadoraNum && p.huboIncidencia === 'si hubo incidencia');
+        incidenciasLavadora.forEach(p => {
+            let div = document.createElement('div');
+            div.className = 'admin-item';
+            div.innerHTML = `<span>⚠️ <b>Incidencia:</b> ${p.descripcionIncidencia || 'Sin descripción'}</span> <span style="color: var(--accent-red);">${formatearFechaDMY(p.fechaRetiro || p.fechaEntrega)}</span>`;
+            listaRepuestosLav.appendChild(div);
+        });
+
+        if (repuestosLavadora.length === 0 && incidenciasLavadora.length === 0) {
+            listaRepuestosLav.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85em; padding: 5px;">No hay repuestos ni incidencias registradas para esta lavadora en el lapso.</p>';
+        }
+
+        resultadoDiv.style.display = 'block';
     }
 
     function guardarClienteAdmin(event) {
         event.preventDefault();
         let id = document.getElementById('adm-cli-id').value;
-        let nombre = document.getElementById('adm-cli-nombre').value.trim();
-        let telefono = document.getElementById('adm-cli-telefono').value.trim();
-        let direccion = document.getElementById('adm-cli-direccion').value.trim();
-        let referencia = document.getElementById('adm-cli-referencia').value.trim();
+        let nombre = document.getElementById('adm-cli-nombre').value;
+        let telefono = document.getElementById('adm-cli-telefono').value;
+        let direccion = document.getElementById('adm-cli-direccion').value;
+        let referencia = document.getElementById('adm-cli-referencia').value;
 
-        let data = { nombre, telefono, direccion, referencia };
+        let datos = { nombre, telefono, direccion, referencia };
 
         if (id) {
-            db.collection("clientes").doc(id).update(data).then(() => {
-                alert('Cliente actualizado con éxito.');
+            db.collection("clientes").doc(id).update(datos).then(() => {
                 cancelarEdicionCliente();
+                alert('¡Cliente actualizado con éxito!');
             });
         } else {
-            db.collection("clientes").add(data).then(() => {
-                alert('Cliente agregado con éxito.');
+            db.collection("clientes").add(datos).then(() => {
                 document.getElementById('form-admin-cliente').reset();
+                alert('¡Cliente registrado con éxito!');
             });
         }
     }
 
     function prepararModificarCliente(id) {
-        let c = dbClientes.find(item => item.id === id);
-        if (!c) return;
-        document.getElementById('adm-cli-id').value = c.id;
-        document.getElementById('adm-cli-nombre').value = c.nombre || '';
-        document.getElementById('adm-cli-telefono').value = c.telefono || '';
-        document.getElementById('adm-cli-direccion').value = c.direccion || '';
-        document.getElementById('adm-cli-referencia').value = c.referencia || '';
+        let cli = dbClientes.find(c => c.id === id);
+        if (!cli) return;
+        document.getElementById('adm-cli-id').value = cli.id;
+        document.getElementById('adm-cli-nombre').value = cli.nombre;
+        document.getElementById('adm-cli-telefono').value = cli.telefono;
+        document.getElementById('adm-cli-direccion').value = cli.direccion;
+        document.getElementById('adm-cli-referencia').value = cli.referencia;
         document.getElementById('titulo-form-cliente').textContent = '✏️ Modificar Cliente';
         document.getElementById('btn-cancelar-edicion-cli').style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function cancelarEdicionCliente() {
@@ -1980,9 +1990,9 @@
     }
 
     function eliminarCliente(id) {
-        if(confirm('¿Está seguro de eliminar este cliente?')) {
+        if (confirm('¿Está seguro de eliminar este cliente?')) {
             db.collection("clientes").doc(id).delete().then(() => {
-                alert('Cliente eliminado correctamente.');
+                alert('Cliente eliminado con éxito.');
             });
         }
     }
@@ -1996,8 +2006,8 @@
             numero: numero,
             estatusManual: 'disponible'
         }).then(() => {
-            alert('Lavadora agregada al inventario.');
             document.getElementById('form-admin-lavadora').reset();
+            alert('¡Lavadora agregada al inventario con éxito!');
         });
     }
 
@@ -2025,10 +2035,9 @@
         event.preventDefault();
         let nombre = document.getElementById('adm-rep-nombre').value.trim();
         if(!nombre) return;
-
         db.collection("catalogo_repuestos").add({ nombre }).then(() => {
-            alert('Repuesto agregado al catálogo.');
             document.getElementById('form-admin-repuesto').reset();
+            alert('¡Repuesto agregado al catálogo!');
         });
     }
 
@@ -2036,10 +2045,31 @@
         event.preventDefault();
         let texto = document.getElementById('adm-motivo-texto').value.trim();
         if(!texto) return;
-
         db.collection("motivos_cancelacion").add({ texto }).then(() => {
-            alert('Motivo agregado.');
             document.getElementById('form-admin-motivo').reset();
+            alert('¡Motivo de cancelación agregado!');
+        });
+    }
+
+    function guardarClienteRapido() {
+        let nombre = document.getElementById('cli-nombre-rapido').value;
+        let telefono = document.getElementById('cli-telefono-rapido').value;
+        let direccion = document.getElementById('cli-direccion-rapido').value;
+        let referencia = document.getElementById('cli-referencia-rapido').value;
+
+        if (!nombre || !telefono) {
+            alert('Por favor complete al menos el nombre y teléfono del cliente.');
+            return;
+        }
+
+        db.collection("clientes").add({ nombre, telefono, direccion, referencia }).then((docRef) => {
+            seleccionarClienteAutocomplete(docRef.id, nombre, direccion);
+            document.getElementById('seccion-nuevo-cliente').style.display = 'none';
+            document.getElementById('cli-nombre-rapido').value = '';
+            document.getElementById('cli-telefono-rapido').value = '';
+            document.getElementById('cli-direccion-rapido').value = '';
+            document.getElementById('cli-referencia-rapido').value = '';
+            alert('¡Cliente registrado y seleccionado con éxito!');
         });
     }
 
@@ -2047,40 +2077,34 @@
         event.preventDefault();
         let clienteId = document.getElementById('ped-cliente').value;
         let fechaEntrega = document.getElementById('ped-fecha-entrega').value;
-        let tiempoAlquiler = document.getElementById('ped-tiempo').value;
-        let lavadoraAsignada = document.getElementById('ped-lavadora').value;
+        let tiempo = document.getElementById('ped-tiempo').value;
+        let lavadora = document.getElementById('ped-lavadora').value;
 
         if (!clienteId) {
             alert('Por favor seleccione un cliente válido usando el buscador.');
             return;
         }
 
-        if (!lavadoraAsignada) {
-            alert('No hay lavadoras disponibles para asignar.');
+        if (!lavadora) {
+            alert('No hay lavadoras disponibles seleccionadas.');
             return;
         }
 
-        let clienteObj = dbClientes.find(c => c.id === clienteId) || {};
+        let clienteObj = dbClientes.find(c => c.id === clienteId);
 
         db.collection("pedidos").add({
             clienteId: clienteId,
-            clienteNombre: clienteObj.nombre || 'Cliente',
-            direccion: clienteObj.direccion || '',
-            referencia: clienteObj.referencia || '',
+            clienteNombre: clienteObj ? clienteObj.nombre : 'Cliente',
             fechaEntrega: fechaEntrega,
-            tiempoAlquiler: tiempoAlquiler,
-            lavadoraAsignada: lavadoraAsignada,
-            estatus: 'pendiente',
-            modalidadPago: null,
-            montoPagado: null,
-            huboIncidencia: null,
-            descripcionIncidencia: null
+            tiempoAlquiler: tiempo,
+            lavadoraAsignada: lavadora,
+            estatus: 'pendiente'
         }).then(() => {
-            alert('¡Pedido registrado con éxito! Ahora se encuentra en la pestaña de lavadoras por entregar.');
             document.getElementById('form-agregar-pedido').reset();
-            document.getElementById('busqueda-cliente-input').value = '';
-            document.getElementById('ped-cliente').value = '';
             document.getElementById('cliente-seleccionado-badge').style.display = 'none';
+            const botones = document.querySelectorAll('.tab-btn');
+            cambiarPestaña({ currentTarget: botones[1] }, 'tab-por-entregar');
+            alert('¡Pedido registrado con éxito en Lavadoras por Entregar!');
         });
     }
 
@@ -2098,16 +2122,29 @@
     function procesarEntregaFinal(event) {
         event.preventDefault();
         let pedidoId = document.getElementById('ent-pedido-id').value;
+        let lavadoraNum = document.getElementById('ent-lavadora').value;
+        let fechaEntrega = document.getElementById('ent-fecha').value;
+        let tiempoAlquiler = document.getElementById('ent-tiempo').value;
         let modalidad = document.getElementById('ent-modalidad-pago').value;
-        let monto = modalidad === 'pago' ? parseFloat(document.getElementById('ent-monto').value) || 0 : null;
+        let monto = document.getElementById('ent-monto').value;
 
-        db.collection("pedidos").doc(pedidoId).update({
-            estatus: 'entregado',
+        let actualizaciones = {
+            lavadoraAsignada: lavadoraNum,
+            fechaEntrega: fechaEntrega,
+            tiempoAlquiler: tiempoAlquiler,
             modalidadPago: modalidad,
-            montoPagado: monto
-        }).then(() => {
+            estatus: 'entregado'
+        };
+
+        if (modalidad === 'pago') {
+            actualizaciones.montoPagado = parseFloat(monto) || 0;
+        } else {
+            actualizaciones.montoPagado = null;
+        }
+
+        db.collection("pedidos").doc(pedidoId).update(actualizaciones).then(() => {
             cerrarModal('modal-entregar');
-            alert('¡Lavadora entregada y marcada como alquilada con éxito!');
+            alert('¡Entrega registrada con éxito! La lavadora pasa a estatus Alquilada.');
         });
     }
 
@@ -2124,38 +2161,39 @@
             return;
         }
 
-        if (!pedidoIdParaCancelar) return;
-
         db.collection("pedidos").doc(pedidoIdParaCancelar).update({
             estatus: 'cancelado',
             motivoCancelacion: motivo
         }).then(() => {
             cerrarModal('modal-cancelar');
-            pedidoIdParaCancelar = null;
-            alert('El pedido ha sido cancelado correctamente.');
+            alert('Pedido cancelado con éxito.');
         });
     }
 
     function registrarGastoRepuesto(event) {
         event.preventDefault();
         let nombre = document.getElementById('rep-seleccionado').value;
-        let costo = parseFloat(document.getElementById('rep-costo').value) || 0;
+        let costo = parseFloat(document.getElementById('rep-costo').value);
         let lavadoraNum = document.getElementById('rep-lavadora-num').value;
         let pagadoPor = document.getElementById('rep-pagado-por').value;
         let fechaHoy = new Date().toISOString();
 
+        if (!nombre || isNaN(costo) || !lavadoraNum || !pagadoPor) {
+            alert('Por favor complete todos los campos del repuesto.');
+            return;
+        }
+
         db.collection("gastos_repuestos").add({
-            nombre: nombre,
-            costo: costo,
-            lavadoraNum: lavadoraNum,
-            pagadoPor: pagadoPor,
+            nombre,
+            costo,
+            lavadoraNum,
+            pagadoPor,
             fecha: fechaHoy
         }).then(() => {
-            alert('¡Compra de repuesto registrada con éxito!');
             document.getElementById('form-gasto-repuesto').reset();
+            alert('¡Gasto de repuesto registrado con éxito!');
         });
     }
 </script>
-
 </body>
 </html>
