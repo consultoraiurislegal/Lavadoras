@@ -565,7 +565,7 @@
         <!-- PESTAÑA 7: REGISTRO DE OPERACIONES -->
         <div id="tab-operaciones" class="tab-content">
             <h4 style="color: var(--border-gold); margin-top: 0; font-family: 'Cinzel', serif;">📋 Registro General de Operaciones y Pagos</h4>
-            <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 15px;">Aquí puedes visualizar, editar el monto pagado, modificar o eliminar cualquier operación de cobro registrada en el sistema.</p>
+            <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 15px;">Aquí puedes visualizar, editar el monto pagado, fecha de pago, modificar o eliminar cualquier operación de cobro registrada en el sistema.</p>
             
             <div class="seccion-form">
                 <h5>📅 Lapso de Tiempo</h5>
@@ -669,7 +669,7 @@
 
             <div id="contenedor-monto-retiro" style="display: none; background: rgba(212, 175, 55, 0.08); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-gold);">
                 <label style="font-size: 0.85em; font-weight: bold; color: var(--border-gold);">Monto Pagado por el Servicio ($):</label>
-                <p style="font-size: 0.8e; color: var(--text-muted); margin: 2px 0 8px 0;">Este servicio se registró con la modalidad "Paga cuando termina el servicio". Ingrese el monto cobrado:</p>
+                <p style="font-size: 0.8em; color: var(--text-muted); margin: 2px 0 8px 0;">Este servicio se registró con la modalidad "Paga cuando termina el servicio". Ingrese el monto cobrado hoy:</p>
                 <input type="number" step="0.01" id="ret-monto-terminar" class="input-field" placeholder="Ingrese el monto pagado" style="margin-bottom: 0;">
             </div>
 
@@ -726,6 +726,9 @@
             
             <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Cliente:</label>
             <input type="text" id="edit-op-cliente" class="input-field" readonly style="background: var(--bg-deep); color: var(--text-muted);">
+
+            <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Fecha de Pago:</label>
+            <input type="datetime-local" id="edit-op-fecha-pago" class="input-field" required>
 
             <label style="font-size: 0.85em; font-weight: bold; color: var(--text-muted);">Monto Pagado ($):</label>
             <input type="number" step="0.01" id="edit-op-monto" class="input-field" required>
@@ -928,10 +931,26 @@
         return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
     }
 
+    /* 
+     * Función auxiliar para obtener la fecha clave según la cual se imputa financieramente/operativamente un pedido.
+     * Prioridad: fechaPago > fechaRetiro > fechaEntrega
+     */
+    function obtenerFechaOperativaPedido(pedido) {
+        if (pedido.fechaPago) return pedido.fechaPago;
+        if (pedido.fechaRetiro) return pedido.fechaRetiro;
+        return pedido.fechaEntrega;
+    }
+
     function filtrarPorRangoFecha(lista, campoFechaStr, rango, prefijo) {
         let ahora = new Date();
         return lista.filter(item => {
             let valFecha = item[campoFechaStr];
+            
+            // Si el objeto es un pedido y evaluamos fechaEntrega por defecto, usamos el criterio del MOMENTO DEL PAGO si existe
+            if (campoFechaStr === 'fechaEntrega' && item.fechaEntrega) {
+                valFecha = obtenerFechaOperativaPedido(item);
+            }
+
             if (!valFecha) return false;
             let fechaItem = parsearFechaLocal(valFecha);
             if (isNaN(fechaItem.getTime())) return false;
@@ -1481,6 +1500,10 @@
             descripcionIncidencia: descIncidencia
         };
 
+        /* 
+         * CORRECCIÓN DE NEGOCIO: Si paga al terminar el servicio (al retirarla), 
+         * la fecha del pago (fechaPago) se fija en la fecha y hora exacta del retiro.
+         */
         if (pedidoObj && pedidoObj.modalidadPago === 'paga al terminar') {
             let montoIngresado = parseFloat(document.getElementById('ret-monto-terminar').value);
             if (isNaN(montoIngresado) || montoIngresado < 0) {
@@ -1488,6 +1511,7 @@
                 return;
             }
             actualizaciones.montoPagado = montoIngresado;
+            actualizaciones.fechaPago = fechaRetiro;
         }
 
         db.collection("pedidos").doc(pedidoId).update(actualizaciones).then(() => {
@@ -1503,8 +1527,8 @@
         let pedidosFiltrados = filtrarPorRangoFecha(dbPedidos, 'fechaEntrega', rango, 'op');
 
         pedidosFiltrados.sort((a, b) => {
-            let fechaA = parsearFechaLocal(a.fechaEntrega || 0);
-            let fechaB = parsearFechaLocal(b.fechaEntrega || 0);
+            let fechaA = parsearFechaLocal(obtenerFechaOperativaPedido(a));
+            let fechaB = parsearFechaLocal(obtenerFechaOperativaPedido(b));
             return fechaA - fechaB;
         });
 
@@ -1518,10 +1542,11 @@
                 listaOpPedidos.innerHTML = '<p style="color: var(--text-muted); font-size:0.85em;">No hay pedidos registrados en este lapso.</p>';
             } else {
                 pedidosFiltrados.forEach(p => {
+                    let fechaOperativa = obtenerFechaOperativaPedido(p);
                     let div = document.createElement('div');
                     div.className = 'admin-item';
                     div.innerHTML = `
-                        <span><b>📅 ${formatearFechaDMY(p.fechaEntrega)}</b> | <b>${p.clienteNombre || 'Cliente'}</b> (Lav: N° ${p.lavadoraAsignada || 'N/A'}) - Monto: <b style="color:var(--accent-green);">$${p.montoPagado ? parseFloat(p.montoPagado).toFixed(2) : '0.00'}</b> [${p.estatus.toUpperCase()}]</span>
+                        <span><b>📅 Pago: ${formatearFechaDMY(fechaOperativa)}</b> | <b>${p.clienteNombre || 'Cliente'}</b> (Lav: N° ${p.lavadoraAsignada || 'N/A'}) - Monto: <b style="color:var(--accent-green);">$${p.montoPagado ? parseFloat(p.montoPagado).toFixed(2) : '0.00'}</b> [${p.estatus.toUpperCase()}]</span>
                         <div>
                             <button class="btn-accion" style="padding:4px 8px; font-size:0.75em;" onclick="abrirModalEditarPedidoOp('${p.id}')">✏️ Editar</button>
                             <button class="btn-peligro" style="padding:4px 8px; font-size:0.75em;" onclick="eliminarPedidoOp('${p.id}')">🗑️</button>
@@ -1538,6 +1563,7 @@
         if(!p) return;
         document.getElementById('edit-op-pedido-id').value = p.id;
         document.getElementById('edit-op-cliente').value = p.clienteNombre || 'Cliente';
+        document.getElementById('edit-op-fecha-pago').value = p.fechaPago || p.fechaRetiro || p.fechaEntrega;
         document.getElementById('edit-op-monto').value = p.montoPagado || 0;
         document.getElementById('edit-op-estatus').value = p.estatus || 'pendiente';
         document.getElementById('modal-editar-pedido').style.display = 'flex';
@@ -1546,10 +1572,12 @@
     function guardarEdicionPedidoOp(event) {
         event.preventDefault();
         let id = document.getElementById('edit-op-pedido-id').value;
+        let nuevaFechaPago = document.getElementById('edit-op-fecha-pago').value;
         let nuevoMonto = parseFloat(document.getElementById('edit-op-monto').value) || 0;
         let nuevoEstatus = document.getElementById('edit-op-estatus').value;
 
         db.collection("pedidos").doc(id).update({
+            fechaPago: nuevaFechaPago,
             montoPagado: nuevoMonto,
             estatus: nuevoEstatus
         }).then(() => {
@@ -1750,7 +1778,7 @@
                 if (!clientesIncidenciasDetalles[nombreCli]) clientesIncidenciasDetalles[nombreCli] = [];
                 clientesIncidenciasDetalles[nombreCli].push({
                     lavadora: p.lavadoraAsignada || 'N/A',
-                    fecha: formatearFechaDMY(p.fechaRetiro || p.fechaEntrega)
+                    fecha: formatearFechaDMY(obtenerFechaOperativaPedido(p))
                 });
             }
         });
@@ -1819,7 +1847,7 @@
 
         let promedioTexto = '--';
         if (totalServicios > 1) {
-            let fechas = pedidosCliente.map(p => parsearFechaLocal(p.fechaEntrega).getTime()).sort((a,b) => a - b);
+            let fechas = pedidosCliente.map(p => parsearFechaLocal(obtenerFechaOperativaPedido(p)).getTime()).sort((a,b) => a - b);
             let diffs = [];
             for (let i = 1; i < fechas.length; i++) {
                 diffs.push(fechas[i] - fechas[i-1]);
@@ -1844,7 +1872,7 @@
             pedidosCliente.forEach(p => {
                 let div = document.createElement('div');
                 div.className = 'admin-item';
-                div.innerHTML = `<span>🧺 <b>Lavadora N° ${p.lavadoraAsignada || 'N/A'}</b></span> <span style="color: var(--border-gold);">${formatearFechaDMY(p.fechaEntrega)}</span>`;
+                div.innerHTML = `<span>🧺 <b>Lavadora N° ${p.lavadoraAsignada || 'N/A'}</b></span> <span style="color: var(--border-gold);">${formatearFechaDMY(obtenerFechaOperativaPedido(p))}</span>`;
                 listaLavadorasCli.appendChild(div);
             });
         }
@@ -1858,7 +1886,7 @@
             incidenciasCliente.forEach(p => {
                 let div = document.createElement('div');
                 div.className = 'admin-item';
-                div.innerHTML = `<span>🧺 <b>Lav. N° ${p.lavadoraAsignada}</b>: ${p.descripcionIncidencia || 'Sin descripción'}</span> <span style="color: var(--text-muted);">${formatearFechaDMY(p.fechaEntrega)}</span>`;
+                div.innerHTML = `<span>🧺 <b>Lav. N° ${p.lavadoraAsignada}</b>: ${p.descripcionIncidencia || 'Sin descripción'}</span> <span style="color: var(--text-muted);">${formatearFechaDMY(obtenerFechaOperativaPedido(p))}</span>`;
                 listaInc.appendChild(div);
             });
         }
@@ -1896,7 +1924,7 @@
             pedidosLavadora.forEach(p => {
                 let div = document.createElement('div');
                 div.className = 'admin-item';
-                div.innerHTML = `<span>👤 <b>${p.clienteNombre || 'Cliente'}</b></span> <span style="color: var(--border-gold);">${formatearFechaDMY(p.fechaEntrega)}</span>`;
+                div.innerHTML = `<span>👤 <b>${p.clienteNombre || 'Cliente'}</b></span> <span style="color: var(--border-gold);">${formatearFechaDMY(obtenerFechaOperativaPedido(p))}</span>`;
                 listaClientesLav.appendChild(div);
             });
         }
@@ -1918,7 +1946,7 @@
         incidenciasLavadora.forEach(p => {
             let div = document.createElement('div');
             div.className = 'admin-item';
-            div.innerHTML = `<span>⚠️ <b>Incidencia:</b> ${p.descripcionIncidencia || 'Sin descripción'}</span> <span style="color: var(--accent-red);">${formatearFechaDMY(p.fechaRetiro || p.fechaEntrega)}</span>`;
+            div.innerHTML = `<span>⚠️ <b>Incidencia:</b> ${p.descripcionIncidencia || 'Sin descripción'}</span> <span style="color: var(--accent-red);">${formatearFechaDMY(obtenerFechaOperativaPedido(p))}</span>`;
             listaRepuestosLav.appendChild(div);
         });
 
@@ -2133,10 +2161,16 @@
             estatus: 'entregado'
         };
 
+        /*
+         * CORRECCIÓN DE NEGOCIO: Si el pago se realiza de inmediato al entregar (modalidad 'pago'), 
+         * la fecha del pago (fechaPago) se fija en la fecha de la entrega.
+         */
         if (modalidad === 'pago') {
             actualizaciones.montoPagado = parseFloat(monto) || 0;
+            actualizaciones.fechaPago = fechaEntrega;
         } else {
             actualizaciones.montoPagado = null;
+            actualizaciones.fechaPago = null;
         }
 
         db.collection("pedidos").doc(pedidoId).update(actualizaciones).then(() => {
